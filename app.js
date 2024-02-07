@@ -6,9 +6,7 @@ import { v4 as uuidv4 } from "uuid";
 import cors from "cors";
 
 import db from "./db.js";
-
-const sessionID = uuidv4();
-console.log(sessionID);
+import { log } from "node:console";
 
 const app = express();
 const server = createServer(app);
@@ -36,11 +34,44 @@ app.post("/post", (req, res) => {
   res.json({ status: "success" });
 });
 
+const onlineUsers = new Set(); // Ensemble pour stocker les IDs des utilisateurs en ligne
+let onlineUsersCount = 0
+const MAX_USERS = 2;
+
 io.on("connection", (socket) => {
-  console.log("a user connected");
+  // console.log("a user connected");
+
+  socket.on("sessionID",(ID)=>{
+    // Mettre un if sinon quand je crée un user et qu'il n'a pas encore d'ID il ajoute un "null" à mon onlineUsers
+    if(ID){
+      socket.id = ID
+      onlineUsers.add(socket.id);
+      onlineUsersCount = onlineUsers.size;
+      io.emit("playerCount", onlineUsersCount);
+      console.log(onlineUsers)
+      if (onlineUsersCount > MAX_USERS) {
+        console.log("redirect")
+        // Renvoyer le nouvel utilisateur vers une page d'erreur 404
+        socket.emit("redirect", "/lotOfUsers");
+        socket.disconnect(); // Déconnecter le client
+        return;
+      }
+    }
+  })
+
+  socket.on("disconnect", () => {
+    console.log("user disconnected");
+    onlineUsers.delete(socket.id); // Lorsqu'un utilisateur se déconnecte, retirez son ID de l'ensemble des utilisateurs en ligne
+    onlineUsersCount=onlineUsers.size;
+    io.emit("playerCount", onlineUsers.size); // Envoyer le nouveau nombre de joueurs en ligne à tous les clients
+    console.log(onlineUsers)
+  });
+
   socket.on("createUser", async (userData) => {
     const { username } = userData;
     const userID = uuidv4(); // Générer un nouvel identifiant UUID
+    socket.id = userID
+
     try {
       // Insérer les données dans la table 'utilisateurs'
       await db.transaction(async (trx) => {

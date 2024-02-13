@@ -8,7 +8,9 @@ import cors from "cors";
 import db from "./db.js";
 
 const sessionID = uuidv4();
-console.log(sessionID);
+// console.log(sessionID);
+// initial 1
+let gameStep = 1;
 
 const app = express();
 const server = createServer(app);
@@ -37,10 +39,16 @@ app.post("/post", (req, res) => {
 });
 
 io.on("connection", (socket) => {
-  console.log("a user connected");
+  socket.emit("gameStep", gameStep);
+  let userID;
+  socket.on("MyID", (id) => {
+    userID = id;
+  });
+
+  // create a user
   socket.on("createUser", async (userData) => {
-    const { username } = userData;
-    const userID = uuidv4(); // Générer un nouvel identifiant UUID
+    let { username } = userData;
+    userID = uuidv4(); // Générer un nouvel identifiant UUID
     try {
       // Insérer les données dans la table 'utilisateurs'
       await db.transaction(async (trx) => {
@@ -67,9 +75,28 @@ io.on("connection", (socket) => {
       // Gérer l'erreur ici
     }
   });
-});
 
-// Route pour créer un compte (POST)
+  // change step of the game
+  socket.on("changeStep", (step) => {
+    step++;
+    gameStep = step;
+    console.log(gameStep);
+    socket.emit("gameStep", gameStep);
+  });
+
+  // add a hero's type to the db
+  socket.on("selectedHero", async (selectedhero) => {
+    console.log(selectedhero);
+    console.log(userID);
+    try {
+      // Mettre à jour le champ 'hero' dans la table 'users'
+      await db("users").where({ id: userID }).update({ hero: selectedhero });
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour du héros :", error);
+      // Gérer l'erreur ici
+    }
+  });
+});
 
 // Route pour récupérer des données depuis la base de données
 app.get("/users", async (req, res) => {

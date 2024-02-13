@@ -4,6 +4,7 @@ const up = function (knex) {
   return knex.schema.createTable("users", function (table) {
     table.string("ID").primary().unique();
     table.string("username").notNullable();
+    table.string("hero");
     table.string("inventory_id").unsigned(); // Clé étrangère vers la table d'inventaire
     table.foreign("inventory_id").references("inventory.id");
     table.timestamps(true, true);

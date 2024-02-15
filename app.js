@@ -59,14 +59,14 @@ io.on("connection", (socket) => {
         });
         await trx("inventory").insert({
           id: userID, // Utiliser le même ID pour l'inventaire
-          itemName: "default_item", // Nom de l'objet
-          quantity: 0, // Quantité initiale
           user_id: userID, // Utiliser le même ID pour l'utilisateur
         });
       });
 
       // Récupérer la liste mise à jour des utilisateurs
       const users = await db.select().from("users");
+      // Récupérer la liste mise à jour des inventaires
+      const inventories = await db.select().from("inventory");
 
       // Envoyer l'ID unique généré au client
       socket.emit("userCreated", { userID });
@@ -98,11 +98,22 @@ io.on("connection", (socket) => {
   });
 });
 
-// Route pour récupérer des données depuis la base de données
+// Route pour récupérer des données depuis la base de données Users
 app.get("/users", async (req, res) => {
   try {
     const users = await db.select().from("users");
     res.json(users);
+  } catch (error) {
+    console.error("Erreur lors de la récupération des utilisateurs :", error);
+    res.status(500).send("Erreur serveur");
+  }
+});
+
+// Route pour récupérer des données depuis la base de données Users
+app.get("/inventories", async (req, res) => {
+  try {
+    const inventories = await db.select().from("inventory");
+    res.json(inventories);
   } catch (error) {
     console.error("Erreur lors de la récupération des utilisateurs :", error);
     res.status(500).send("Erreur serveur");

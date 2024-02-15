@@ -1,0 +1,52 @@
+{
+  "sword": {
+    "name": "Epée",
+    "bonus": "10",
+    "type": "atk"
+  },
+  "stick": {
+    "name": "Bâton",
+    "bonus": "10",
+    "type": "atk"
+  },
+  "dagger": {
+    "name": "Dague",
+    "bonus": "5",
+    "type": "atk"
+  },
+  "hammer": {
+    "name": "Marteau",
+    "bonus": "5",
+    "type": "atk"
+  },
+  "ax": {
+    "name": "Hache",
+    "bonus": "10",
+    "type": "atk"
+  },
+  "bow": {
+    "name": "Arc",
+    "bonus": "10",
+    "type": "atk"
+  },
+  "potionAtk": {
+    "name": "Epée",
+    "bonus": "15",
+    "type": "atk"
+  },
+  "potionHeal": {
+    "name": "Epée",
+    "bonus": "15",
+    "type": "pv"
+  },
+  "shield": {
+    "name": "Bouclier",
+    "bonus": "10",
+    "type": "pv"
+  },
+  "key": {
+    "name": "Clef",
+    "bonus": "0",
+    "type": "bonus"
+  }
+}

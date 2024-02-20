@@ -2,26 +2,31 @@
   "knight": {
     "name": "Chevalier",
     "ability": "Le chevalier double sa vie pendant une minute (une fois par partie)",
-    "color": "#949494"
+    "color": "#949494",
+    "img": "knight.png"
   },
   "wizard": {
     "name": "Magicien",
     "ability": "Le magicien peut se rendre invisible et se déplacer librement pendant 5 sec.",
-    "color": "#FC750C"
+    "color": "#FC750C",
+    "img": "wizard.png"
   },
   "rodeur": {
     "name": "Rodeur",
     "ability": "Le rodeur se rend invisible et se déplace librement pendant 5 sec.",
-    "color": "#E35457"
+    "color": "#E35457",
+    "img": "rodeur.png"
   },
   "death": {
     "name": "Faucheuse",
     "ability": "Le magicien peut révéler la localisation du boss de donjon dans une zone de 4 cases.",
-    "color": "#B90404"
+    "color": "#B90404",
+    "img": "death.png"
   },
   "druide": {
     "name": "Druide",
     "ability": "Le druide soigne un allié à hauteur de deux vies.",
-    "color": "#2BC44E"
+    "color": "#2BC44E",
+    "img": "druide.png"
   }
 }

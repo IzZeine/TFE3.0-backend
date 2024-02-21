@@ -1,6 +1,7 @@
 const up = function (knex) {
   return knex.schema.createTable("rooms", function (table) {
     table.increments("id").primary();
+    table.string("gameId").notNullable();
     table.string("name").notNullable().unique();
     table.string("item");
     table.timestamps(true, true); // Ajoute les colonnes created_at et updated_at automatiquement

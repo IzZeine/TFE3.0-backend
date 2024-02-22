@@ -9,12 +9,12 @@ const up = function (knex) {
     table.string("statut").notNullable();
     // started -> Boolean
     table.boolean("started").notNullable();
-    // step de la partie -> float
-    table.float("step").notNullable();
-    // nbre de rooms -> 39 -> float
-    table.float("rooms").notNullable();
-    // nbre de joueurs -> entre 2 et 6 -> float
-    table.float("users");
+    // step de la partie -> integer
+    table.integer("step").notNullable();
+    // nbre de rooms -> 39 -> integer
+    table.integer("rooms").notNullable();
+    // nbre de joueurs -> entre 2 et 6 -> integer
+    table.integer("users");
 
     table.timestamps(true, true); // Ajoute les colonnes created_at et updated_at automatiquement
   });

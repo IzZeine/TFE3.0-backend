@@ -3,7 +3,7 @@
 const up = function (knex) {
   return knex.schema.createTable("users", function (table) {
     table.string("id").primary().unique();
-    table.string("gameId").notNullable();
+    table.string("gameId");
     table.string("username").notNullable(); // update quand le joueur créer son ID
     table.boolean("ready").notNullable();
     table.string("hero"); // update quand le joueur à choisi son hero

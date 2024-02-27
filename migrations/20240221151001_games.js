@@ -4,7 +4,7 @@ const up = function (knex) {
     // ID -> string uuidv4
     table.string("gameId").primary().unique().notNullable();
     // name -> string
-    table.string("name").notNullable();
+    table.string("name").notNullable().unique();
     // statut -> waiting / inactive / sarted / cleared
     table.string("statut").notNullable();
     // started -> Boolean

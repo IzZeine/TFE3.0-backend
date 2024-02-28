@@ -4,15 +4,18 @@ import { Server } from "socket.io";
 import bodyParser from "body-parser";
 import { v4 as uuidv4 } from "uuid";
 import cors from "cors";
-import routing from "./routing.js";
+import itemJson from "./items.json" assert { type: "json" };
+import heroesJson from "./heroes.json" assert { type: "json" };
 
 import db from "./db.js";
 
 let gameID;
+// initial 1
 let gameStep = 1;
-const maxUsersOnline = 6;
-const minUsersOnline = 2;
 let activeUsers = new Map();
+// initial 6
+const maxUsersOnline = 4;
+const minUsersOnline = 2;
 let playersReady = new Map();
 
 let arrayOfItems = Object.values(itemJson); // passer le Json en array pour utiliser les index plus facilement
@@ -33,7 +36,16 @@ app.use(function (req, res, next) {
   next();
 });
 
-routing(app);
+app.get("/", (req, res) => {
+  res.send("<h1>Hello world</h1>");
+});
+
+// ?
+app.post("/post", (req, res) => {
+  console.log("receive", req.params.channel, req.body);
+  req.io.emit("post", req.body);
+  res.json({ status: "success" });
+});
 
 let initializationRooms = async (gameID) => {
   let id = gameID;
@@ -62,6 +74,9 @@ let initializationRooms = async (gameID) => {
     }
   }
 };
+
+// la direction des rooms : autre db qui donne tous les chemins possible 0 (à gauche) room 3
+//
 
 io.on("connection", async (socket) => {
   io.emit("gameStep", gameStep);
@@ -99,7 +114,10 @@ io.on("connection", async (socket) => {
   let userIDPromise = new Promise((resolve, reject) => {
     socket.on("getMyUser", async (id) => {
       // resolve(id); // Résoudre la promesse avec l'ID utilisateur
-
+      activeUsers.set(id, true);
+      activeUsers.delete(null);
+      io.emit("updateUsersCount", activeUsers.size);
+      console.log(activeUsers);
       let myUser = await db("users").where("id", id).first();
       resolve(myUser);
       socket.emit("ThisIsYourUser", myUser);
@@ -108,45 +126,17 @@ io.on("connection", async (socket) => {
 
   const user = await userIDPromise;
 
-  // gestion de deconnection des users
-  socket.on("disconnect", async () => {
-    if (user) {
-      console.log(`L'utilisateur avec l'ID ${user.id} s'est déconnecté`);
-
-      // Supprime l'ID de socket de la map des utilisateurs connectés
-      activeUsers.delete(user.id);
-      await db("games")
-        .where({ gameId: user.gameId })
-        .update({ users: activeUsers.size });
-
-      // Met à jour le nombre d'utilisateurs connectés et émet à tous les clients
-      io.emit("updateUsersCount", activeUsers.size);
-    }
-  });
-
   socket.on("joinGame", async (id) => {
     try {
-      socket.join(id);
-      let usersInGame = await db("games").where({ gameId: id }).first();
-      if (usersInGame.size >= maxUsersOnline) {
-        socket.emit("deco", user.id);
-        // socket.disconnect;
-        console.log("deco");
-      } else {
-        // ajuster le bon nbre de joueurs à la game
-        activeUsers.set(user.id, true);
-        activeUsers.delete(null);
-        await db("users").where({ id: user.id }).update({ gameId: id });
-        await db("inventory").where({ id: user.id }).update({ gameId: id });
-        await db("games")
-          .where({ gameId: id })
-          .update({ users: activeUsers.size });
-        // Met à jour le nombre d'utilisateurs connectés et émet à tous les clients
-        io.emit("updateUsersCount", activeUsers.size);
-        console.log(activeUsers);
-      }
+      // sokcet.join(gameID)
+      // ajuster le bon nbre de joueurs à la game
+      await db("users").where({ id: user.id }).update({ gameId: id });
+      await db("inventory").where({ id: user.id }).update({ gameId: id });
+      // dabord récupérer la valeur puis l'incrémenter
+      await db("games").where({ gameId: id }).update({ users: +1 });
+      // IF users.size > 6 --> close the game and open de viewer accès
     } catch (error) {
-      console.error("Erreur lors de connaction à la partie :", error);
+      console.error("Erreur lors de la mise à jour du héros :", error);
       // Gérer l'erreur ici
     }
   });
@@ -162,6 +152,16 @@ io.on("connection", async (socket) => {
     }
   });
 
+  if (activeUsers.size == maxUsersOnline) {
+    socket.emit("deco", userID);
+    // socket.disconnect;
+    console.log("deco");
+    // Supprime l'ID de socket de la map des utilisateurs connectés
+    activeUsers.delete(userID);
+    // Met à jour le nombre d'utilisateurs connectés et émet à tous les clients
+    io.emit("updateUsersCount", activeUsers.size);
+  }
+
   // add a hero's type to the db
   socket.on("selectedHero", async (selectedhero) => {
     try {
@@ -173,11 +173,58 @@ io.on("connection", async (socket) => {
     }
     socket.emit("registeredHero");
   });
+
+  // gestion de deconnection des users
+  socket.on("disconnect", () => {
+    if (user) {
+      console.log(`L'utilisateur avec l'ID ${user.id} s'est déconnecté`);
+
+      // Supprime l'ID de socket de la map des utilisateurs connectés
+      activeUsers.delete(user.id);
+
+      // Met à jour le nombre d'utilisateurs connectés et émet à tous les clients
+      io.emit("updateUsersCount", activeUsers.size);
+    }
+  });
 });
 
 //@TODO : comment gérer les diff games ? empêcher les joueurs de se connecter quand le game est lancée ou pleine et changer les infos de game durant la partie. Est-ce que ça doit être lié avec le socket ? je ne pense pas. Comment faire alors ?
 
 //@TODO : ou gérer la direction des salles? quelle salle peut aller ou ? gérer le déplacement des joueurs et afficher les bonnes sorties en fonction
+
+// Route pour récupérer des données depuis la base de données Games
+app.get("/games", async (req, res) => {
+  try {
+    const games = await db.select().from("games");
+    res.json(games);
+  } catch (error) {
+    console.error("Erreur lors de la récupération des utilisateurs :", error);
+    res.status(500).send("Erreur serveur");
+  }
+});
+
+// Route pour récupérer des données depuis la base de données Users
+app.get("/users", async (req, res) => {
+  try {
+    const users = await db.select().from("users");
+    res.json(users);
+  } catch (error) {
+    console.error("Erreur lors de la récupération des utilisateurs :", error);
+    res.status(500).send("Erreur serveur");
+  }
+});
+
+// Route pour récupérer des données depuis un Json
+app.get("/items", async (req, res) => {
+  const items = await itemJson;
+  res.json(items);
+});
+
+// Route pour récupérer des données depuis un Json
+app.get("/heroes", async (req, res) => {
+  const heroes = await heroesJson;
+  res.json(heroes);
+});
 
 // Route pour récupérer et créer une nouvelle partie
 app.post("/creategame", async (req, res) => {

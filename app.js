@@ -75,6 +75,9 @@ let initializationRooms = async (gameID) => {
   }
 };
 
+// la direction des rooms : autre db qui donne tous les chemins possible 0 (à gauche) room 3
+//
+
 io.on("connection", async (socket) => {
   io.emit("gameStep", gameStep);
   io.emit("updateUsersCount", activeUsers.size);
@@ -125,8 +128,11 @@ io.on("connection", async (socket) => {
 
   socket.on("joinGame", async (id) => {
     try {
+      // sokcet.join(gameID)
+      // ajuster le bon nbre de joueurs à la game
       await db("users").where({ id: user.id }).update({ gameId: id });
       await db("inventory").where({ id: user.id }).update({ gameId: id });
+      // dabord récupérer la valeur puis l'incrémenter
       await db("games").where({ gameId: id }).update({ users: +1 });
       // IF users.size > 6 --> close the game and open de viewer accès
     } catch (error) {
@@ -170,13 +176,15 @@ io.on("connection", async (socket) => {
 
   // gestion de deconnection des users
   socket.on("disconnect", () => {
-    console.log(`L'utilisateur avec l'ID ${user.id} s'est déconnecté`);
+    if (user) {
+      console.log(`L'utilisateur avec l'ID ${user.id} s'est déconnecté`);
 
-    // Supprime l'ID de socket de la map des utilisateurs connectés
-    activeUsers.delete(user.id);
+      // Supprime l'ID de socket de la map des utilisateurs connectés
+      activeUsers.delete(user.id);
 
-    // Met à jour le nombre d'utilisateurs connectés et émet à tous les clients
-    io.emit("updateUsersCount", activeUsers.size);
+      // Met à jour le nombre d'utilisateurs connectés et émet à tous les clients
+      io.emit("updateUsersCount", activeUsers.size);
+    }
   });
 });
 

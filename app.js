@@ -5,6 +5,7 @@ import bodyParser from "body-parser";
 import { v4 as uuidv4 } from "uuid";
 import cors from "cors";
 import routing from "./routing.js";
+import itemJson from "./items.json" assert { type: "json" };
 
 import db from "./db.js";
 

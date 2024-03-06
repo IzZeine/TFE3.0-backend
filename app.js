@@ -5,12 +5,15 @@ import bodyParser from "body-parser";
 import { v4 as uuidv4 } from "uuid";
 import cors from "cors";
 import routing from "./routing.js";
+// @TODO : faire un JSON des boss
 import itemJson from "./items.json" assert { type: "json" };
 
+// @TODO : faire des modules plutot qu'un énorme JS
 import db from "./db.js";
 
 let gameID;
 let gameStep = 1;
+// @TODO : pas const
 const maxUsersOnline = 6;
 const minUsersOnline = 2;
 let activeUsers = new Map();
@@ -37,10 +40,12 @@ app.use(function (req, res, next) {
 routing(app);
 
 let initializationRooms = async (gameID) => {
+  // @TODO : faire la migration des directions possible de chaque salle
   let id = gameID;
   let myGame = await db("games").where("gameId", id).first();
   let rowCount = myGame.rooms;
   let myRooms = await db("rooms").where("gameId", id);
+  // @TODO : faire un json avec le bon nombre d'item et une seul clef
   console.log(myRooms.length);
   if (myRooms == rowCount) {
     console.log("rooms has already initialized");
@@ -69,6 +74,7 @@ io.on("connection", async (socket) => {
   io.emit("updateUsersCount", activeUsers.size);
 
   // create a user
+  // @TODO : ajouter (life : 3) et (def) à la migration
   socket.on("createUser", async (data) => {
     console.log(data);
     let name = data;
@@ -100,7 +106,6 @@ io.on("connection", async (socket) => {
   let userIDPromise = new Promise((resolve, reject) => {
     socket.on("getMyUser", async (id) => {
       // resolve(id); // Résoudre la promesse avec l'ID utilisateur
-
       let myUser = await db("users").where("id", id).first();
       resolve(myUser);
       socket.emit("ThisIsYourUser", myUser);
@@ -108,6 +113,10 @@ io.on("connection", async (socket) => {
   });
 
   const user = await userIDPromise;
+
+  if (user.gameId){
+    activeUsers.set(user.id, true);
+  }
 
   // gestion de deconnection des users
   socket.on("disconnect", async () => {
@@ -124,6 +133,11 @@ io.on("connection", async (socket) => {
       io.emit("updateUsersCount", activeUsers.size);
     }
   });
+
+  // @TODO : quand :  socket.on("GameIsReady",OnlineUsers) : lancer la partie et bloqué les nouveau user avec le nbre de users online
+  // @TODO : si qql veut se connecter alors que la partie est lancée alors il est déco
+  // @TODO : quand la partie se lance faire un nbre aléatoire et l'index des users pour choisir le méchant
+  // @TODO : le boss commence à une autre room : 39
 
   socket.on("joinGame", async (id) => {
     try {
@@ -152,9 +166,12 @@ io.on("connection", async (socket) => {
     }
   });
 
+  // @TODO : gérer autrement ? if foreach user.heroes : true -> change step
   socket.on("wantToDoSomething", () => {
     socket.emit("wait");
     playersReady.set(user.id, true);
+    console.log(playersReady)
+    console.log(activeUsers)
     if (playersReady.size === activeUsers.size) {
       gameStep++;
       console.log(gameStep);
@@ -167,7 +184,9 @@ io.on("connection", async (socket) => {
   socket.on("selectedHero", async (selectedhero) => {
     try {
       // Mettre à jour le champ 'hero' dans la table 'users'
-      await db("users").where({ id: user.id }).update({ hero: selectedhero });
+      await db("users").where({ id: user.id }).update({ hero: selectedhero.name });
+      await db("users").where({ id: user.id }).update({ atk: selectedhero.baseAtk });
+      await db("users").where({ id: user.id }).update({ life: selectedhero.baseLife });
     } catch (error) {
       console.error("Erreur lors de la mise à jour du héros :", error);
       // Gérer l'erreur ici
@@ -175,10 +194,6 @@ io.on("connection", async (socket) => {
     socket.emit("registeredHero");
   });
 });
-
-//@TODO : comment gérer les diff games ? empêcher les joueurs de se connecter quand le game est lancée ou pleine et changer les infos de game durant la partie. Est-ce que ça doit être lié avec le socket ? je ne pense pas. Comment faire alors ?
-
-//@TODO : ou gérer la direction des salles? quelle salle peut aller ou ? gérer le déplacement des joueurs et afficher les bonnes sorties en fonction
 
 // Route pour récupérer et créer une nouvelle partie
 app.post("/creategame", async (req, res) => {
@@ -208,7 +223,6 @@ app.post("/creategame", async (req, res) => {
           users: 0,
         });
       });
-      //@TODO : ajouter l'id de la game aux users qui la rejoignent
 
       initializationRooms(gameID);
 

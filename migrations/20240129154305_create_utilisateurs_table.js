@@ -6,6 +6,7 @@ const up = function (knex) {
     table.string("gameId");
     table.string("username").notNullable(); // update quand le joueur créer son ID
     table.boolean("ready").notNullable();
+    // @TODO : ajouter (life : 3) et (def) à la migration
     table.string("hero"); // update quand le joueur à choisi son hero
     table.integer("atk"); // update quand le joueur à choisi son hero et quand il gagne un item
     table.integer("life"); // update quand le joueur à choisi son hero et quand il gagne un item

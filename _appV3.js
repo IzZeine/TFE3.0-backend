@@ -75,17 +75,6 @@ io.on("connection", async (socket) => {
   io.emit("gameStep", gameStep);
   io.emit("updateUsersCount", activeUsers.size);
 
-  socket.on("isActiveUsers", async (data) => {
-    let users = [];
-    let activeUsersKeys = Array.from(activeUsers.keys());
-
-    for (const id of activeUsersKeys) {
-      let user = await db("users").where("id", id).first();
-      users.push(user);
-    }
-    socket.emit("activeUsers", users);
-  });
-
   // create a user
   socket.on("createUser", async (data) => {
     console.log(data);
@@ -125,6 +114,13 @@ io.on("connection", async (socket) => {
   });
 
   const user = await userIDPromise;
+  console.log("test");
+
+  if (user) {
+    if (user.gameId) {
+      activeUsers.set(user.id, true);
+    }
+  }
 
   // gestion de deconnection des users
   socket.on("disconnect", async () => {
@@ -150,9 +146,8 @@ io.on("connection", async (socket) => {
   socket.on("joinGame", async (id) => {
     try {
       socket.join(id);
-      let game = await db("games").where({ gameId: id }).first();
-      console.log(game.statut);
-      if (game.users >= maxUsersOnline || game.statut == "sarted") {
+      let usersInGame = await db("games").where({ gameId: id }).first();
+      if (usersInGame.size >= maxUsersOnline) {
         socket.emit("deco", user.id);
         // socket.disconnect;
         console.log("deco");
@@ -167,7 +162,7 @@ io.on("connection", async (socket) => {
           .update({ users: activeUsers.size });
         // Met à jour le nombre d'utilisateurs connectés et émet à tous les clients
         io.emit("updateUsersCount", activeUsers.size);
-        io.emit("activeUsers", Array.from(activeUsers.keys()));
+        console.log(activeUsers);
       }
     } catch (error) {
       console.error("Erreur lors de connaction à la partie :", error);
@@ -176,11 +171,18 @@ io.on("connection", async (socket) => {
   });
 
   // @TODO : gérer autrement ? if foreach user.heroes : true -> change step
-  if (user) {
-    if (user.gameId) {
-      activeUsers.set(user.id, true);
+  socket.on("wantToDoSomething", () => {
+    socket.emit("wait");
+    playersReady.set(user.id, true);
+    console.log(playersReady);
+    console.log(activeUsers);
+    if (playersReady.size === activeUsers.size) {
+      gameStep++;
+      console.log(gameStep);
+      socket.emit("gameStep", gameStep);
+      playersReady.clear();
     }
-  }
+  });
 
   // add a hero's type to the db
   socket.on("selectedHero", async (selectedhero) => {

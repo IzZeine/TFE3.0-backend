@@ -74,6 +74,7 @@ io.on("connection", async (socket) => {
   io.emit("updateUsersCount", activeUsers.size);
 
   let reloadUsers = async () => {
+    console.log(activeUsers)
     let users = [];
     let activeUsersKeys = Array.from(activeUsers.keys());
 
@@ -91,10 +92,11 @@ io.on("connection", async (socket) => {
   };
 
   socket.on("getMyUser", async (id) => {
+    console.log("userID", id)
+    if(!id) return
     let myUser = await db("users").where("id", id).first();
-    socket.data.userId = myUser.id;
     if (myUser.gameId) socket.data.gameId = myUser.gameId;
-    socket.off("getMyUser", this);
+    if (myUser.id) socket.data.userId = myUser.id;
     socket.emit("ThisIsYourUser", myUser);
   });
 
@@ -104,7 +106,6 @@ io.on("connection", async (socket) => {
 
   // create a user
   socket.on("createUser", async (data) => {
-    console.log(data);
     let name = data;
     let userID = uuidv4(); // Générer un nouvel identifiant UUID
     try {
@@ -161,52 +162,44 @@ io.on("connection", async (socket) => {
     updateGame(id);
   });
 
-  function checkUserConditions(socket) {
-    return socket.data.userID && socket.data.gameID;
-  }
-
-  socket.on("searchRoom", async (data) => {
-    if (!checkUserConditions(socket)) return;
-  });
-
   // const user = await userIDPromise;
 
   // gestion de deconnection des users
   socket.on("disconnect", async () => {
-    if (user) {
-      console.log(`L'utilisateur avec l'ID ${user.id} s'est déconnecté`);
+      if(!socket.data.userId && !socket.data.gameId) return;
+      console.log(`L'utilisateur avec l'ID ${socket.data.userId} s'est déconnecté`);
 
       // Supprime l'ID de socket de la map des utilisateurs connectés
-      activeUsers.delete(user.id);
+      activeUsers.delete(socket.data.userId);
       await db("games")
-        .where({ gameId: user.gameId })
+        .where({ gameId: socket.data.gameId })
         .update({ users: activeUsers.size });
 
       // Met à jour le nombre d'utilisateurs connectés et émet à tous les clients
       // @TODO : envoyer la liste à jour des users
       io.emit("updateUsersCount", activeUsers.size);
       await reloadUsers();
-    }
   });
 
   // @TODO : quand la partie se lance faire un nbre aléatoire et l'index des users pour choisir le méchant
   // @TODO : le boss commence à une autre room : 39
 
   socket.on("joinGame", async (id) => {
-    if (!socket.data.userID) return;
+    console.log("mySocket", socket.data.userId)
+    if (!socket.data.userId) return;
     try {
       socket.join(id);
       let game = await db("games").where({ gameId: id }).first();
       if (game.users >= maxUsersOnline || game.statut == "sarted") {
-        socket.emit("deco", user.id);
+        socket.emit("deco", socket.data.userId);
         // socket.disconnect;
         console.log("deco");
       } else {
         // ajuster le bon nbre de joueurs à la game
-        activeUsers.set(user.id, true);
+        activeUsers.set(socket.data.userId, true);
         activeUsers.delete(null);
-        await db("users").where({ id: user.id }).update({ gameId: id });
-        await db("inventory").where({ id: user.id }).update({ gameId: id });
+        await db("users").where({ id: socket.data.userId }).update({ gameId: id });
+        await db("inventory").where({ id: socket.data.userId }).update({ gameId: id });
         await db("games")
           .where({ gameId: id })
           .update({ users: activeUsers.size });
@@ -220,24 +213,25 @@ io.on("connection", async (socket) => {
     }
   });
 
-  if (user) {
-    if (user.gameId) {
+  if (socket.data.userId) {
+    if (socket.data.gameId) {
       activeUsers.set(user.id, true);
     }
   }
 
   // add a hero's type to the db
   socket.on("selectedHero", async (selectedhero) => {
+    if(!socket.data.userId && !socket.data.gameId) return;
     try {
       // Mettre à jour le champ 'hero' dans la table 'users'
       await db("users")
-        .where({ id: user.id })
+        .where({ id: socket.data.userId })
         .update({ hero: selectedhero.name });
       await db("users")
-        .where({ id: user.id })
+        .where({ id: socket.data.userId })
         .update({ atk: selectedhero.baseAtk });
       await db("users")
-        .where({ id: user.id })
+        .where({ id: socket.data.userId })
         .update({ def: selectedhero.baseLife });
     } catch (error) {
       console.error("Erreur lors de la mise à jour du héros :", error);

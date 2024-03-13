@@ -3,6 +3,7 @@ import gamesListController from "./routeControllers/gamesListController.js";
 import usersListController from "./routeControllers/usersListController.js";
 import heroesListController from "./routeControllers/heroesListController.js";
 import itemsListController from "./routeControllers/itemsListController.js";
+import bossListController from "./routeControllers/bossListController.js";
 
 export default (app) => {
   app.get("/", homepageController);
@@ -15,6 +16,9 @@ export default (app) => {
 
   // Route pour récupérer des données depuis un Json
   app.get("/heroes", heroesListController);
+
+  // Route pour récupérer des données depuis un Json
+  app.get("/boss", bossListController);
 
   // Route pour récupérer des données depuis un Json
   app.get("/items", itemsListController);

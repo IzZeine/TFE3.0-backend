@@ -1,8 +1,8 @@
 const up = function (knex) {
   return knex.schema.createTable("roomsConnections", function (table) {
-    table.string("initialRoom").primary().notnullabe();
-    table.string("destinationRoom").notnullabe();
-    table.string("direction").notnullabe();
+    table.string("initialRoom").primary().notNullable();
+    table.string("destinationRoom").notNullable();
+    table.string("direction").notNullable();
 
     table.timestamps(true, true); // Ajoute les colonnes created_at et updated_at automatiquement
   });

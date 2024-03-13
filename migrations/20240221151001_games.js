@@ -5,12 +5,8 @@ const up = function (knex) {
     table.string("gameId").primary().unique().notNullable();
     // name -> string
     table.string("name").notNullable().unique();
-    // statut -> waiting / inactive / sarted / cleared
+    // statut -> waiting / inactive / closed / started / cleared
     table.string("statut").notNullable();
-    // started -> Boolean
-    table.boolean("started").notNullable();
-    // step de la partie -> integer
-    table.integer("step").notNullable();
     // nbre de rooms -> 39 -> integer
     table.integer("rooms").notNullable();
     // nbre de joueurs -> entre 2 et 6 -> integer

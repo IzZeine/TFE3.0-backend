@@ -6,10 +6,10 @@ const up = function (knex) {
     table.string("gameId");
     table.string("username").notNullable(); // update quand le joueur créer son ID
     table.boolean("ready").notNullable();
-    // @TODO : ajouter (life : 3) et (def) à la migration
     table.string("hero"); // update quand le joueur à choisi son hero
+    table.integer("life"); // update quand le joueur perd une vie
     table.integer("atk"); // update quand le joueur à choisi son hero et quand il gagne un item
-    table.integer("life"); // update quand le joueur à choisi son hero et quand il gagne un item
+    table.integer("def"); // update quand le joueur à choisi son hero et quand il gagne un item
     table.string("team"); // choisir quand tout le monde est connecté et que la partie commence
     table.integer("room"); // update à chaque changement de salle
     table.string("inventory_id").unsigned(); // Clé étrangère vers la table d'inventaire

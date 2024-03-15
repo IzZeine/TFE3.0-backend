@@ -5,7 +5,6 @@ import bodyParser from "body-parser";
 import { v4 as uuidv4 } from "uuid";
 import cors from "cors";
 import routing from "./routing.js";
-// @TODO : faire un JSON des boss
 import itemJson from "./items.json" assert { type: "json" };
 
 // @TODO : faire des modules plutot qu'un énorme JS
@@ -13,7 +12,6 @@ import db from "./db.js";
 
 let gameID;
 
-// @TODO : pas const
 const maxUsersOnline = 6;
 const minUsersOnline = 2;
 
@@ -44,22 +42,32 @@ let initializationRooms = async (gameID) => {
   // @TODO : faire la migration des directions possible de chaque salle
   let id = gameID;
   let myGame = await db("games").where("gameId", id).first();
-  let rowCount = myGame.rooms;
   let myRooms = await db("rooms").where("gameId", id);
-  // @TODO : faire un json avec le bon nombre d'item et une seul clef
-  console.log(myRooms.length);
+  let rowCount = myGame.rooms;
+  let numberOfSafeRoom = 5;
+  let keyItem = arrayOfItems[arrayOfItems.length - 1];
   if (myRooms == rowCount) {
     console.log("rooms has already initialized");
   } else {
+    function generateRandomIndexForKey() {
+      var num = Math.floor(Math.random() * rowCount);
+      return num === 8 || num === 15 ? randomIndexForKey() : num;
+    }
+    let randomIndexForKey = generateRandomIndexForKey();
     for (let i = 0; i < rowCount; i++) {
+      let randomIndex = Math.floor(
+        Math.random() * (arrayOfItems.length - 1) // -1 pour ne pas avoir la key (qui est le dernier item du JSON)
+      );
+      let chosenItem = arrayOfItems[randomIndex];
+      if (i == 0 || i == numberOfSafeRoom) chosenItem = null;
+      if (i == randomIndexForKey) chosenItem = keyItem;
       try {
-        let indexAleatoire = Math.floor(Math.random() * arrayOfItems.length);
         // Insérez les salles dans la base de données
         await db.transaction(async (trx) => {
           await trx("rooms").insert({
             gameId: id,
             name: "room" + i,
-            item: arrayOfItems[indexAleatoire],
+            item: chosenItem,
           });
         });
         console.log("Les salles ont été insérées avec succès.");
@@ -74,7 +82,7 @@ io.on("connection", async (socket) => {
   io.emit("updateUsersCount", activeUsers.size);
 
   let reloadUsers = async () => {
-    console.log(activeUsers)
+    console.log(activeUsers);
     let users = [];
     let activeUsersKeys = Array.from(activeUsers.keys());
 
@@ -92,12 +100,12 @@ io.on("connection", async (socket) => {
   };
 
   socket.on("getMyUser", async (id) => {
-    console.log("userID", id)
-    if(!id) return
+    if (!id) return;
     let myUser = await db("users").where("id", id).first();
+    socket.emit("ThisIsYourUser", myUser);
+    if (!myUser) return;
     if (myUser.gameId) socket.data.gameId = myUser.gameId;
     if (myUser.id) socket.data.userId = myUser.id;
-    socket.emit("ThisIsYourUser", myUser);
   });
 
   socket.on("isActiveUsers", async (data) => {
@@ -144,14 +152,24 @@ io.on("connection", async (socket) => {
     let indexAleatoire = Math.floor(Math.random() * activeUsersKeys.length);
     await db("users")
       .where("id", activeUsersKeys[indexAleatoire])
-      .update({ team: "boss" });
+      .update({ team: "boss" })
+      .update({ room: 39 });
 
     reloadUsers();
     updateGame(id);
   });
 
   socket.on("openGame", async (id) => {
+    let activeUsersKeys = Array.from(activeUsers.keys());
     await db("games").where({ gameId: id }).update({ statut: "waiting" });
+
+    for (const id of activeUsersKeys) {
+      await db("users").where("id", id).update({ team: null });
+      await db("users").where("id", id).update({ hero: null });
+      await db("users").where("id", id).update({ atk: null });
+      await db("users").where("id", id).update({ def: null });
+    }
+
     reloadUsers();
     updateGame(id);
   });
@@ -166,26 +184,23 @@ io.on("connection", async (socket) => {
 
   // gestion de deconnection des users
   socket.on("disconnect", async () => {
-      if(!socket.data.userId && !socket.data.gameId) return;
-      console.log(`L'utilisateur avec l'ID ${socket.data.userId} s'est déconnecté`);
+    if (!socket.data.userId || !socket.data.gameId) return;
+    console.log(
+      `L'utilisateur avec l'ID ${socket.data.userId} s'est déconnecté`
+    );
 
-      // Supprime l'ID de socket de la map des utilisateurs connectés
-      activeUsers.delete(socket.data.userId);
-      await db("games")
-        .where({ gameId: socket.data.gameId })
-        .update({ users: activeUsers.size });
+    // Supprime l'ID de socket de la map des utilisateurs connectés
+    activeUsers.delete(socket.data.userId);
+    await db("games")
+      .where({ gameId: socket.data.gameId })
+      .update({ users: activeUsers.size });
 
-      // Met à jour le nombre d'utilisateurs connectés et émet à tous les clients
-      // @TODO : envoyer la liste à jour des users
-      io.emit("updateUsersCount", activeUsers.size);
-      await reloadUsers();
+    // Met à jour le nombre d'utilisateurs connectés et émet à tous les clients
+    io.emit("updateUsersCount", activeUsers.size);
+    await reloadUsers();
   });
 
-  // @TODO : quand la partie se lance faire un nbre aléatoire et l'index des users pour choisir le méchant
-  // @TODO : le boss commence à une autre room : 39
-
   socket.on("joinGame", async (id) => {
-    console.log("mySocket", socket.data.userId)
     if (!socket.data.userId) return;
     try {
       socket.join(id);
@@ -198,8 +213,12 @@ io.on("connection", async (socket) => {
         // ajuster le bon nbre de joueurs à la game
         activeUsers.set(socket.data.userId, true);
         activeUsers.delete(null);
-        await db("users").where({ id: socket.data.userId }).update({ gameId: id });
-        await db("inventory").where({ id: socket.data.userId }).update({ gameId: id });
+        await db("users")
+          .where({ id: socket.data.userId })
+          .update({ gameId: id });
+        await db("inventory")
+          .where({ id: socket.data.userId })
+          .update({ gameId: id });
         await db("games")
           .where({ gameId: id })
           .update({ users: activeUsers.size });
@@ -221,7 +240,7 @@ io.on("connection", async (socket) => {
 
   // add a hero's type to the db
   socket.on("selectedHero", async (selectedhero) => {
-    if(!socket.data.userId && !socket.data.gameId) return;
+    if (!socket.data.userId && !socket.data.gameId) return;
     try {
       // Mettre à jour le champ 'hero' dans la table 'users'
       await db("users")
@@ -250,7 +269,7 @@ app.post("/creategame", async (req, res) => {
     // Vérifier si le nom de la partie existe déjà dans la base de données
     const existingGame = await db("games").where("name", name).first();
     if (existingGame) {
-      console.log("NON");
+      console.log("La partie existe déjà");
       return res
         .status(400)
         .json({ success: false, error: "Game name already exists" });

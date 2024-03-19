@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from "uuid";
 import cors from "cors";
 import routing from "./routing.js";
 import itemJson from "./items.json" assert { type: "json" };
+import roomsConnections from "./roomsConnections.json" assert { type: "json" };
 
 // @TODO : faire des modules plutot qu'un énorme JS
 import db from "./db.js";
@@ -19,6 +20,7 @@ let activeUsers = new Map();
 let playersReady = new Map();
 
 let arrayOfItems = Object.values(itemJson); // passer le Json en array pour utiliser les index plus facilement
+let roomsConnectionsArray = Object.values(roomsConnections); // passer le Json en array pour utiliser les index plus facilement
 
 const app = express();
 const server = createServer(app);
@@ -38,13 +40,33 @@ app.use(function (req, res, next) {
 
 routing(app);
 
+// Initialisation des connections entre chaque salles
+for (let i = 0; i < roomsConnectionsArray.length; i++) {
+  let myDb = await db("roomsConnections");
+  if (myDb) break;
+  try {
+    // Insérez les salles dans la base de données
+    await db.transaction(async (trx) => {
+      await trx("roomsConnections").insert({
+        initialRoom: i,
+        top: roomsConnectionsArray[i].top,
+        right: roomsConnectionsArray[i].right,
+        bot: roomsConnectionsArray[i].bot,
+        left: roomsConnectionsArray[i].left,
+      });
+    });
+  } catch (error) {
+    console.error("Erreur lors de l'insertion des salles :", error);
+  }
+}
+
 let initializationRooms = async (gameID) => {
   // @TODO : faire la migration des directions possible de chaque salle
   let id = gameID;
   let myGame = await db("games").where("gameId", id).first();
   let myRooms = await db("rooms").where("gameId", id);
   let rowCount = myGame.rooms;
-  let numberOfSafeRoom = 5;
+  let numberOfSafeRoom = 19;
   let keyItem = arrayOfItems[arrayOfItems.length - 1];
   if (myRooms == rowCount) {
     console.log("rooms has already initialized");
@@ -82,7 +104,6 @@ io.on("connection", async (socket) => {
   io.emit("updateUsersCount", activeUsers.size);
 
   let reloadUsers = async () => {
-    console.log(activeUsers);
     let users = [];
     let activeUsersKeys = Array.from(activeUsers.keys());
 
@@ -123,7 +144,6 @@ io.on("connection", async (socket) => {
           id: userID,
           username: name,
           inventory_id: userID, // Utiliser le même ID pour l'inventaire
-          ready: false,
           room: "0",
           life: 3,
         });
@@ -153,7 +173,7 @@ io.on("connection", async (socket) => {
     await db("users")
       .where("id", activeUsersKeys[indexAleatoire])
       .update({ team: "boss" })
-      .update({ room: 39 });
+      .update({ room: 38 });
 
     reloadUsers();
     updateGame(id);
@@ -176,11 +196,18 @@ io.on("connection", async (socket) => {
 
   socket.on("startGame", async (id) => {
     await db("games").where({ gameId: id }).update({ statut: "started" });
+    let activeUsersKeys = Array.from(activeUsers.keys());
+    for (const [index, id] of activeUsersKeys.entries()) {
+      let player = await db("users").where("id", id).first();
+      let numberOfPlayer = "player" + (index + 1);
+      await db("users").where("id", id).update({ player: numberOfPlayer });
+      if (player.team == "boss") {
+        await db("users").where("id", id).update({ player: "boss" });
+      }
+    }
     reloadUsers();
     updateGame(id);
   });
-
-  // const user = await userIDPromise;
 
   // gestion de deconnection des users
   socket.on("disconnect", async () => {
@@ -240,9 +267,13 @@ io.on("connection", async (socket) => {
 
   // add a hero's type to the db
   socket.on("selectedHero", async (selectedhero) => {
+    console.log(selectedhero);
     if (!socket.data.userId && !socket.data.gameId) return;
     try {
       // Mettre à jour le champ 'hero' dans la table 'users'
+      await db("users")
+        .where({ id: socket.data.userId })
+        .update({ heroImg: selectedhero.img });
       await db("users")
         .where({ id: socket.data.userId })
         .update({ hero: selectedhero.name });
@@ -258,6 +289,21 @@ io.on("connection", async (socket) => {
     }
     socket.emit("registeredHero");
     await reloadUsers();
+  });
+
+  socket.on("getRooms", async (gameId) => {
+    if (!socket.data.userId && !socket.data.gameId) return;
+    let rooms = await db("rooms").where({ gameId: gameId });
+    socket.emit("youAskedRooms", rooms);
+  });
+
+  socket.on("askToChangeRoom", async (targetRoom) => {
+    if (!socket.data.userId && !socket.data.gameId) return;
+    await db("users")
+      .where({ id: socket.data.userId })
+      .update({ room: targetRoom });
+    await reloadUsers();
+    io.emit("movePlayer", socket.data.userId);
   });
 });
 

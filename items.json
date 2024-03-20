@@ -1,51 +1,81 @@
 {
   "sword": {
+    "nameId": "sword",
     "name": "Epée",
+    "rarity": "normal",
+    "condition": "3",
     "bonus": "10",
     "type": "atk"
   },
   "stick": {
+    "nameId": "stick",
     "name": "Bâton",
+    "rarity": "normal",
+    "condition": "3",
     "bonus": "10",
     "type": "atk"
   },
   "dagger": {
+    "nameId": "dagger",
     "name": "Dague",
+    "rarity": "normal",
+    "condition": "3",
     "bonus": "5",
     "type": "atk"
   },
   "hammer": {
+    "nameId": "hammer",
     "name": "Marteau",
+    "rarity": "normal",
+    "condition": "3",
     "bonus": "5",
     "type": "atk"
   },
   "ax": {
+    "nameId": "ax",
     "name": "Hache",
+    "rarity": "normal",
+    "condition": "3",
     "bonus": "10",
     "type": "atk"
   },
   "bow": {
+    "nameId": "bow",
     "name": "Arc",
+    "rarity": "normal",
+    "condition": "3",
     "bonus": "10",
     "type": "atk"
   },
   "potionAtk": {
+    "nameId": "potionAtk",
     "name": "Epée",
+    "rarity": "normal",
+    "condition": "3",
     "bonus": "15",
     "type": "atk"
   },
   "potionHeal": {
+    "nameId": "potionHeal",
     "name": "Epée",
+    "rarity": "normal",
+    "condition": "3",
     "bonus": "15",
     "type": "pv"
   },
   "shield": {
+    "nameId": "shield",
     "name": "Bouclier",
+    "rarity": "normal",
+    "condition": "3",
     "bonus": "10",
     "type": "pv"
   },
   "key": {
+    "nameId": "key",
     "name": "Clef",
+    "rarity": "rare",
+    "condition": "6",
     "bonus": "0",
     "type": "bonus"
   }

@@ -14,13 +14,10 @@ import db from "./db.js";
 let gameID;
 
 const maxUsersOnline = 6;
-const minUsersOnline = 2;
 
 let activeUsers = new Map();
-let playersReady = new Map();
 
 let arrayOfItems = Object.values(itemJson); // passer le Json en array pour utiliser les index plus facilement
-let roomsConnectionsArray = Object.values(roomsConnections); // passer le Json en array pour utiliser les index plus facilement
 
 const app = express();
 const server = createServer(app);
@@ -40,28 +37,12 @@ app.use(function (req, res, next) {
 
 routing(app);
 
-// Initialisation des connections entre chaque salles
-for (let i = 0; i < roomsConnectionsArray.length; i++) {
-  let myDb = await db("roomsConnections");
-  if (myDb) break;
-  try {
-    // Insérez les salles dans la base de données
-    await db.transaction(async (trx) => {
-      await trx("roomsConnections").insert({
-        initialRoom: i,
-        top: roomsConnectionsArray[i].top,
-        right: roomsConnectionsArray[i].right,
-        bot: roomsConnectionsArray[i].bot,
-        left: roomsConnectionsArray[i].left,
-      });
-    });
-  } catch (error) {
-    console.error("Erreur lors de l'insertion des salles :", error);
-  }
+function generateRandomIndexForKey(rowCount) {
+  var num = Math.floor(Math.random() * rowCount);
+  return num === 8 || num === 15 ? generateRandomIndexForKey() : num;
 }
 
 let initializationRooms = async (gameID) => {
-  // @TODO : faire la migration des directions possible de chaque salle
   let id = gameID;
   let myGame = await db("games").where("gameId", id).first();
   let myRooms = await db("rooms").where("gameId", id);
@@ -71,11 +52,7 @@ let initializationRooms = async (gameID) => {
   if (myRooms == rowCount) {
     console.log("rooms has already initialized");
   } else {
-    function generateRandomIndexForKey() {
-      var num = Math.floor(Math.random() * rowCount);
-      return num === 8 || num === 15 ? randomIndexForKey() : num;
-    }
-    let randomIndexForKey = generateRandomIndexForKey();
+    let randomIndexForKey = generateRandomIndexForKey(rowCount);
     for (let i = 0; i < rowCount; i++) {
       let randomIndex = Math.floor(
         Math.random() * (arrayOfItems.length - 1) // -1 pour ne pas avoir la key (qui est le dernier item du JSON)
@@ -118,6 +95,34 @@ io.on("connection", async (socket) => {
   let updateGame = async (id) => {
     let game = await db("games").where("gameId", id).first();
     io.emit("updateGame", game);
+  };
+
+  let updateRooms = async (playerRoom) => {
+    let item = playerRoom.item;
+    console.log("item : ", item);
+    // item = JSON.parse(item); // convert string to json
+    let user = await db("users").where("id", socket.data.userId).first();
+    let inventory = user.inventory;
+    console.log(!inventory ? "oui" : " non");
+    if (inventory) inventory = inventory + "/" + item;
+    if (!inventory) inventory = item;
+    console.log("inventory : ", inventory);
+    console.log(inventory.split("/"));
+
+    await db("users")
+      .where("id", socket.data.userId)
+      .update("inventory", inventory);
+
+    user = await db("users").where("id", socket.data.userId).first();
+
+    reloadUsers();
+    socket.emit("updateUser", user);
+    await db("rooms")
+      .where("gameId", playerRoom.gameId)
+      .andWhere("name", playerRoom.name)
+      .update("item", "null");
+    let rooms = await db("rooms").where({ gameId: playerRoom.gameId });
+    socket.emit("youAskedRooms", rooms);
   };
 
   socket.on("getMyUser", async (id) => {
@@ -168,6 +173,7 @@ io.on("connection", async (socket) => {
     let activeUsersKeys = Array.from(activeUsers.keys());
     for (const id of activeUsersKeys) {
       await db("users").where("id", id).update({ team: "hero" });
+      await db("users").where("id", id).update({ room: 0 });
     }
     let indexAleatoire = Math.floor(Math.random() * activeUsersKeys.length);
     await db("users")
@@ -223,8 +229,8 @@ io.on("connection", async (socket) => {
       .update({ users: activeUsers.size });
 
     // Met à jour le nombre d'utilisateurs connectés et émet à tous les clients
-    io.emit("updateUsersCount", activeUsers.size);
     await reloadUsers();
+    io.emit("updateUsersCount", activeUsers.size);
   });
 
   socket.on("joinGame", async (id) => {
@@ -267,7 +273,6 @@ io.on("connection", async (socket) => {
 
   // add a hero's type to the db
   socket.on("selectedHero", async (selectedhero) => {
-    console.log(selectedhero);
     if (!socket.data.userId && !socket.data.gameId) return;
     try {
       // Mettre à jour le champ 'hero' dans la table 'users'
@@ -304,6 +309,11 @@ io.on("connection", async (socket) => {
       .update({ room: targetRoom });
     await reloadUsers();
     io.emit("movePlayer", socket.data.userId);
+  });
+
+  socket.on("getItemInRoom", async (data) => {
+    if (!socket.data.userId && !socket.data.gameId) return;
+    updateRooms(data);
   });
 });
 

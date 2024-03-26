@@ -49,7 +49,7 @@
   },
   "potionAtk": {
     "nameId": "potionAtk",
-    "name": "Epée",
+    "name": "Potion de force",
     "rarity": "normal",
     "condition": "3",
     "bonus": "15",
@@ -57,11 +57,11 @@
   },
   "potionHeal": {
     "nameId": "potionHeal",
-    "name": "Epée",
+    "name": "Potion de soin",
     "rarity": "normal",
     "condition": "3",
     "bonus": "15",
-    "type": "pv"
+    "type": "def"
   },
   "shield": {
     "nameId": "shield",
@@ -69,7 +69,7 @@
     "rarity": "normal",
     "condition": "3",
     "bonus": "10",
-    "type": "pv"
+    "type": "def"
   },
   "key": {
     "nameId": "key",

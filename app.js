@@ -39,7 +39,7 @@ routing(app);
 
 function generateRandomIndexForKey(rowCount) {
   var num = Math.floor(Math.random() * rowCount);
-  return num === 8 || num === 15 ? generateRandomIndexForKey() : num;
+  return num === 0 || num === 19 ? generateRandomIndexForKey() : num;
 }
 
 let initializationRooms = async (gameID) => {
@@ -99,19 +99,26 @@ io.on("connection", async (socket) => {
 
   let updateRooms = async (playerRoom) => {
     let item = playerRoom.item;
-    console.log("item : ", item);
-    // item = JSON.parse(item); // convert string to json
+    let itemJson = JSON.parse(item);
     let user = await db("users").where("id", socket.data.userId).first();
+    let userDef = user.def;
+    let userAtk = user.atk;
+    console.log("user: ", userDef, " , ", userAtk);
     let inventory = user.inventory;
-    console.log(!inventory ? "oui" : " non");
     if (inventory) inventory = inventory + "/" + item;
     if (!inventory) inventory = item;
-    console.log("inventory : ", inventory);
-    console.log(inventory.split("/"));
+
+    console.log("item : ", itemJson);
+    console.log(itemJson.bonus);
+
+    if (itemJson.type == "def") userDef = userDef + Number(itemJson.bonus);
+    if (itemJson.type == "atk") userAtk = userAtk + Number(itemJson.bonus);
 
     await db("users")
       .where("id", socket.data.userId)
-      .update("inventory", inventory);
+      .update("inventory", inventory)
+      .update("def", userDef)
+      .update("atk", userAtk);
 
     user = await db("users").where("id", socket.data.userId).first();
 
@@ -304,11 +311,31 @@ io.on("connection", async (socket) => {
 
   socket.on("askToChangeRoom", async (targetRoom) => {
     if (!socket.data.userId && !socket.data.gameId) return;
+
     await db("users")
       .where({ id: socket.data.userId })
       .update({ room: targetRoom });
+
     await reloadUsers();
+
+    let boss = await db("users")
+      .where("gameId", socket.data.gameId)
+      .andWhere("team", "boss")
+      .first();
+
+    let users = await db("users")
+      .whereNot("team", "boss")
+      .andWhere("gameId", socket.data.gameId)
+      .andWhere("room", boss.room);
+
     io.emit("movePlayer", socket.data.userId);
+
+    console.log(boss.room, users);
+
+    if (users.length > 0) {
+      console.log("battle");
+      io.emit("battle", { users: users, boss: boss, room: targetRoom });
+    }
   });
 
   socket.on("getItemInRoom", async (data) => {

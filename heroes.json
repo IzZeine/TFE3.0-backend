@@ -9,16 +9,16 @@
   },
   "wizard": {
     "name": "Magicien",
-    "baseLife": "50",
-    "baseAtk": "10",
+    "baseLife": "40",
+    "baseAtk": "15",
     "ability": "Le magicien peut se rendre invisible et se déplacer librement pendant 5 sec.",
     "color": "#FC750C",
     "img": "wizard.png"
   },
   "rodeur": {
     "name": "Rodeur",
-    "baseLife": "50",
-    "baseAtk": "10",
+    "baseLife": "40",
+    "baseAtk": "15",
     "ability": "Le rodeur se rend invisible et se déplace librement pendant 5 sec.",
     "color": "#E35457",
     "img": "rodeur.png"

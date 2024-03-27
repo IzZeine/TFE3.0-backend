@@ -132,6 +132,10 @@ io.on("connection", async (socket) => {
     socket.emit("youAskedRooms", rooms);
   };
 
+  let endGame = () => {
+    console.log("endGame");
+  };
+
   socket.on("getMyUser", async (id) => {
     if (!id) return;
     let myUser = await db("users").where("id", id).first();
@@ -323,24 +327,61 @@ io.on("connection", async (socket) => {
       .andWhere("team", "boss")
       .first();
 
-    let users = await db("users")
+    let heroes = await db("users")
       .whereNot("team", "boss")
       .andWhere("gameId", socket.data.gameId)
       .andWhere("room", boss.room);
 
-    io.emit("movePlayer", socket.data.userId);
-
-    console.log(boss.room, users);
-
-    if (users.length > 0) {
+    if (heroes.length > 0) {
       console.log("battle");
-      io.emit("battle", { users: users, boss: boss, room: targetRoom });
+      io.emit("battle", { heroes: heroes, boss: boss, room: targetRoom });
+      return;
     }
+
+    io.emit("movePlayer", socket.data.userId);
   });
 
   socket.on("getItemInRoom", async (data) => {
     if (!socket.data.userId && !socket.data.gameId) return;
     updateRooms(data);
+  });
+
+  socket.on("battleEnded", async (data) => {
+    if (data == "endGame") {
+      endGame();
+      return;
+    }
+
+    let heroes = await db("users")
+      .whereNot("team", "boss")
+      .andWhere("gameId", socket.data.gameId)
+      .andWhere("room", data.room);
+
+    // console.log(heroes);
+
+    let min = (a, f) => a.reduce((m, x) => (m[f] < x[f] ? m : x));
+
+    let weakestHero = min(heroes, "def");
+
+    await db("users")
+      .where("id", weakestHero.id)
+      .update("life", weakestHero.life - 1);
+    if (weakestHero.life <= 0) console.log("t'es mort");
+
+    await db("users")
+      .whereNot("team", "boss")
+      .andWhere("gameId", socket.data.gameId)
+      .andWhere("room", data.room)
+      .update("room", 0);
+
+    await db("users")
+      .where("team", "boss")
+      .andWhere("gameId", socket.data.gameId)
+      .andWhere("room", data.room)
+      .update("room", 38);
+
+    io.emit("returnAtSpawn");
+    reloadUsers();
   });
 });
 

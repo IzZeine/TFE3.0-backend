@@ -8,7 +8,7 @@
   "1": {
     "top": "2",
     "right": "6",
-    "bot": "0",
+    "bot": "null",
     "left": "null"
   },
   "2": {
@@ -33,7 +33,7 @@
     "top": "6",
     "right": "10",
     "bot": "null",
-    "left": "0"
+    "left": "null"
   },
   "6": {
     "top": "7",

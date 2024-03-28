@@ -129,11 +129,20 @@ io.on("connection", async (socket) => {
       .andWhere("name", playerRoom.name)
       .update("item", "null");
     let rooms = await db("rooms").where({ gameId: playerRoom.gameId });
-    socket.emit("youAskedRooms", rooms);
+    io.emit("youAskedRooms", rooms);
   };
 
-  let endGame = () => {
-    console.log("endGame");
+  let endGame = async (winner) => {
+    await db("games")
+      .where({ gameId: socket.data.gameId })
+      .update({ statut: "ended" });
+
+    let teamWinner = await db("users")
+      .where({ gameId: socket.data.gameId })
+      .andWhere("team", winner);
+
+    updateGame();
+    io.emit("endGame", teamWinner);
   };
 
   socket.on("getMyUser", async (id) => {
@@ -338,7 +347,7 @@ io.on("connection", async (socket) => {
       return;
     }
 
-    io.emit("movePlayer", socket.data.userId);
+    socket.emit("movePlayer", socket.data.userId);
   });
 
   socket.on("getItemInRoom", async (data) => {
@@ -347,8 +356,28 @@ io.on("connection", async (socket) => {
   });
 
   socket.on("battleEnded", async (data) => {
+    if (!socket.data.userId && !socket.data.gameId) return;
     if (data == "endGame") {
-      endGame();
+      let winner = "hero";
+      endGame(winner);
+      return;
+    }
+
+    if (typeof data === "number") {
+      await db("users")
+        .whereNot("team", "boss")
+        .andWhere("gameId", socket.data.gameId)
+        .andWhere("room", data)
+        .update("room", 0);
+
+      await db("users")
+        .where("team", "boss")
+        .andWhere("gameId", socket.data.gameId)
+        .andWhere("room", data)
+        .update("room", 38);
+
+      io.emit("returnAtSpawn");
+      reloadUsers();
       return;
     }
 
@@ -356,8 +385,6 @@ io.on("connection", async (socket) => {
       .whereNot("team", "boss")
       .andWhere("gameId", socket.data.gameId)
       .andWhere("room", data.room);
-
-    // console.log(heroes);
 
     let min = (a, f) => a.reduce((m, x) => (m[f] < x[f] ? m : x));
 

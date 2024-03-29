@@ -70,6 +70,7 @@ let initializationRooms = async (gameID) => {
           });
         });
         console.log("Les salles ont été insérées avec succès.");
+        console.log(chosenItem);
       } catch (error) {
         console.error("Erreur lors de l'insertion des salles :", error);
       }

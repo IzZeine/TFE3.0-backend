@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "knex": "npx knex migrate:latest",
+    "updateKnex": "del db.sqlite3 && npx knex migrate:latest",
     "dev": "node app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

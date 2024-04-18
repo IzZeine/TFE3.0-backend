@@ -7,7 +7,7 @@
   "scripts": {
     "updateKnex": "del db.sqlite3 && npx knex migrate:latest",
     "knex": "npx knex migrate:latest",
-    "start": "node app.js",
+    "start": "npx knex migrate:latest && node app.js",
     "dev": "nodemon app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

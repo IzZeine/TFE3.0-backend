@@ -6,7 +6,9 @@
   "type": "module",
   "scripts": {
     "updateKnex": "del db.sqlite3 && npx knex migrate:latest",
-    "dev": "node app.js",
+    "knex": "npx knex migrate:latest",
+    "start": "node app.js",
+    "dev": "nodemon app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -16,6 +18,7 @@
     "cors": "^2.8.5",
     "express": "^4.18.2",
     "knex": "^3.1.0",
+    "nodemon": "^3.1.0",
     "socket.io": "^4.7.4",
     "sqlite3": "^5.1.7",
     "uuidv4": "^6.2.13"

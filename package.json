@@ -7,7 +7,8 @@
   "scripts": {
     "updateKnex": "del db.sqlite3 && npx knex migrate:latest",
     "knex": "npx knex migrate:latest",
-    "start": "npx knex migrate:latest && node app.js",
+    "server": "node app.js",
+    "start": "npm-run-all knex server",
     "dev": "nodemon app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -20,6 +21,7 @@
     "express": "^4.18.2",
     "knex": "^3.1.0",
     "nodemon": "^3.1.0",
+    "npm-run-all": "^4.1.5",
     "socket.io": "^4.7.4",
     "sqlite3": "^5.1.7",
     "uuidv4": "^6.2.13"

@@ -7,11 +7,11 @@
 // };
 
 const databaseConfig = {
-  client: "sqlite3",
-  connection: {
-    filename: "./db.sqlite3",
-  },
-  useNullAsDefault: true,
+    client: "sqlite3",
+    connection: {
+        filename: process.env.KNEX_DATA
+    },
+    useNullAsDefault: true,
 };
 
 export default databaseConfig;

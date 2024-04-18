@@ -160,7 +160,7 @@ io.on("connection", async (socket) => {
     });
 
     // create a user
-    socket.on("createUser", async (data) => {
+    socket.on("createUser", async (data, callback) => {
         let name = data;
         let userID = uuidv4(); // Générer un nouvel identifiant UUID
         try {
@@ -183,6 +183,7 @@ io.on("connection", async (socket) => {
 
             // Envoyer l'ID unique généré au client
             socket.emit("userCreated", userID);
+            callback(userID);
         } catch (error) {
             console.error("Erreur lors de la création du compte :", error);
             // Gérer l'erreur ici

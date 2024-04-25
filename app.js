@@ -240,16 +240,22 @@ io.on("connection", async (socket) => {
   // gestion de deconnection des users
   socket.on("disconnect", async () => {
     if (!socket.data.userId || !socket.data.gameId) return;
+
     console.log(
       `L'utilisateur avec l'ID ${socket.data.userId} s'est déconnecté`
     );
 
     // Supprime l'ID de socket de la map des utilisateurs connectés
     activeUsers.delete(socket.data.userId);
+
     await db("games")
       .where({ gameId: socket.data.gameId })
       .update({ users: activeUsers.size });
 
+    await db("users")
+      .where({ id: socket.data.userId })
+      .update({ id: "" })
+      .update({ gameId: "" });
     // Met à jour le nombre d'utilisateurs connectés et émet à tous les clients
     await reloadUsers();
     io.emit("updateUsersCount", activeUsers.size);
@@ -266,6 +272,7 @@ io.on("connection", async (socket) => {
         console.log("deco");
       } else {
         // ajuster le bon nbre de joueurs à la game
+
         activeUsers.set(socket.data.userId, true);
         activeUsers.delete(null);
         await db("users")

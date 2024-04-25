@@ -70,7 +70,6 @@ let initializationRooms = async (gameID) => {
             item: chosenItem,
           });
         });
-        console.log("Les salles ont été insérées avec succès.");
       } catch (error) {
         console.error("Erreur lors de l'insertion des salles :", error);
       }
@@ -254,8 +253,7 @@ io.on("connection", async (socket) => {
 
     await db("users")
       .where({ id: socket.data.userId })
-      .update({ id: "" })
-      .update({ gameId: "" });
+      .update({ gameId: null });
     // Met à jour le nombre d'utilisateurs connectés et émet à tous les clients
     await reloadUsers();
     io.emit("updateUsersCount", activeUsers.size);

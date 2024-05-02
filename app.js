@@ -346,7 +346,7 @@ io.on("connection", async (socket) => {
     let heroes = await db("users")
       .whereNot("team", "boss")
       .andWhere("gameId", socket.data.gameId)
-      .andWhere("room", boss.room);
+      .andWhere("room", boss.room); //@TODO :bug ?
 
     if (heroes.length > 0) {
       console.log("battle");

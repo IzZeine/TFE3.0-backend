@@ -12,7 +12,7 @@
     "baseLife": "40",
     "baseAtk": "15",
     "ability": "Le magicien est plus puissant, il a plus d'attaque.",
-    "color": "#FC750C",
+    "color": "#41708C",
     "img": "wizard.png"
   },
   "rodeur": {

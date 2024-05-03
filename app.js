@@ -303,18 +303,26 @@ io.on("connection", async (socket) => {
     if (!socket.data.userId && !socket.data.gameId) return;
     try {
       // Mettre à jour le champ 'hero' dans la table 'users'
+      // await db("users")
+      //   .where({ id: socket.data.userId })
+      //   .update({ heroImg: selectedhero.img });
+      // await db("users")
+      //   .where({ id: socket.data.userId })
+      //   .update({ hero: selectedhero.name });
+      // await db("users")
+      //   .where({ id: socket.data.userId })
+      //   .update({ atk: selectedhero.baseAtk });
+      // await db("users")
+      //   .where({ id: socket.data.userId })
+      //   .update({ def: selectedhero.baseLife });
       await db("users")
         .where({ id: socket.data.userId })
-        .update({ heroImg: selectedhero.img });
-      await db("users")
-        .where({ id: socket.data.userId })
-        .update({ hero: selectedhero.name });
-      await db("users")
-        .where({ id: socket.data.userId })
-        .update({ atk: selectedhero.baseAtk });
-      await db("users")
-        .where({ id: socket.data.userId })
-        .update({ def: selectedhero.baseLife });
+        .update({ heroImg: selectedhero.img })
+        .update({ hero: selectedhero.name })
+        .update({ atk: selectedhero.baseAtk })
+        .update({ def: selectedhero.baseLife })
+        .update({ color: selectedhero.color })
+        .update({ ability: selectedhero.ability });
     } catch (error) {
       console.error("Erreur lors de la mise à jour du héros :", error);
       // Gérer l'erreur ici

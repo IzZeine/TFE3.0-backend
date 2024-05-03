@@ -7,6 +7,8 @@ const up = function (knex) {
     table.string("username").notNullable(); // update quand le joueur créer son ID
     table.string("heroImg"); // update quand le joueur à choisi son hero
     table.string("hero"); // update quand le joueur à choisi son hero
+    table.string("color"); // update quand le joueur à choisi son hero
+    table.string("ability"); // update quand le joueur à choisi son hero
     table.string("player"); // update quand le joueur à choisi son hero
     table.integer("life"); // update quand le joueur perd une vie
     table.integer("atk"); // update quand le joueur à choisi son hero et quand il gagne un item

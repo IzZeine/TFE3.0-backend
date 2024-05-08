@@ -264,13 +264,12 @@ io.on("connection", async (socket) => {
     try {
       socket.join(id);
       let game = await db("games").where({ gameId: id }).first();
-      if (game.users >= maxUsersOnline || game.statut == "sarted") {
+      if (game.users >= maxUsersOnline) {
         socket.emit("deco", socket.data.userId);
         // socket.disconnect;
         console.log("deco");
       } else {
         // ajuster le bon nbre de joueurs à la game
-
         activeUsers.set(socket.data.userId, true);
         activeUsers.delete(null);
         await db("users")

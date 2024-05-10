@@ -3,6 +3,7 @@
     "name": "Serpent",
     "baseLife": "150",
     "baseAtk": "20",
+    "abilityName" : "..",
     "ability": "Le serpent est frutif et discret dans ses déplacements, il peut rejoindre les salles plus vite mais est moins puissant.",
     "color": "#216A2F",
     "img": "snake.png"
@@ -11,6 +12,7 @@
     "name": "Dragon",
     "baseLife": "200",
     "baseAtk": "15",
+    "abilityName" : "..",
     "ability": "Le dragon est puissant. Se déplace correctement et est un peu résistant.",
     "color": "#350001",
     "img": "dragon.png"
@@ -19,6 +21,7 @@
     "name": "Golem",
     "baseLife": "250",
     "baseAtk": "10",
+    "abilityName" : "..",
     "ability": "Le Golem est plus robuste, il à une forte capacité à résister aux attaques. Cependant il est alors plus lent pour se déplacer",
     "color": "#171417",
     "img": "golem.png"

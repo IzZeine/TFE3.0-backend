@@ -92,6 +92,8 @@ io.on("connection", async (socket) => {
     io.emit("updateUsers", users);
   };
 
+  reloadUsers();
+
   let updateGame = async (id) => {
     let game = await db("games").where("gameId", id).first();
     io.emit("updateGame", game);
@@ -127,7 +129,7 @@ io.on("connection", async (socket) => {
     await db("rooms")
       .where("gameId", playerRoom.gameId)
       .andWhere("name", playerRoom.name)
-      .update("item", "null");
+      .update("item", "");
     let rooms = await db("rooms").where({ gameId: playerRoom.gameId });
     io.emit("youAskedRooms", rooms);
   };
@@ -321,6 +323,7 @@ io.on("connection", async (socket) => {
         .update({ atk: selectedhero.baseAtk })
         .update({ def: selectedhero.baseLife })
         .update({ color: selectedhero.color })
+        .update({ abilityName: selectedhero.abilityName })
         .update({ ability: selectedhero.ability });
     } catch (error) {
       console.error("Erreur lors de la mise à jour du héros :", error);
@@ -367,6 +370,19 @@ io.on("connection", async (socket) => {
   socket.on("getItemInRoom", async (data) => {
     if (!socket.data.userId && !socket.data.gameId) return;
     updateRooms(data);
+  });
+
+  socket.on("saveUser", async (user) => {
+    console.log(user);
+    await db("users").where({ id: user.id }).update({ life: 3 });
+    reloadUsers();
+  });
+
+  socket.on("healUser", async (user) => {
+    console.log(user);
+    let targetLife = user.life + 1;
+    await db("users").where({ id: user.id }).update({ life: targetLife });
+    reloadUsers();
   });
 
   socket.on("battleEnded", async (data) => {
@@ -422,6 +438,9 @@ io.on("connection", async (socket) => {
       .update("room", 38);
 
     io.emit("returnAtSpawn");
+
+    console.log(data);
+
     reloadUsers();
   });
 });

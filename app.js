@@ -226,13 +226,16 @@ io.on("connection", async (socket) => {
   socket.on("startGame", async (id) => {
     await db("games").where({ gameId: id }).update({ statut: "started" });
     let activeUsersKeys = Array.from(activeUsers.keys());
+    let num = 1;
     for (const [index, id] of activeUsersKeys.entries()) {
       let player = await db("users").where("id", id).first();
-      let numberOfPlayer = "player" + (index + 1);
-      await db("users").where("id", id).update({ player: numberOfPlayer });
       if (player.team == "boss") {
         await db("users").where("id", id).update({ player: "boss" });
+        continue;
       }
+      let numberOfPlayer = "player" + num;
+      await db("users").where("id", id).update({ player: numberOfPlayer });
+      num++;
     }
     reloadUsers();
     updateGame(id);
@@ -266,10 +269,10 @@ io.on("connection", async (socket) => {
     try {
       socket.join(id);
       let game = await db("games").where({ gameId: id }).first();
-      if (game.users >= maxUsersOnline) {
-        socket.emit("deco", socket.data.userId);
+      if (game.users > maxUsersOnline) {
+        // socket.emit("deco", socket.data.userId);
         // socket.disconnect;
-        console.log("deco");
+        // console.log("deco");
       } else {
         // ajuster le bon nbre de joueurs à la game
         activeUsers.set(socket.data.userId, true);

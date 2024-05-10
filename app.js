@@ -327,7 +327,8 @@ io.on("connection", async (socket) => {
         .update({ def: selectedhero.baseLife })
         .update({ color: selectedhero.color })
         .update({ abilityName: selectedhero.abilityName })
-        .update({ ability: selectedhero.ability });
+        .update({ ability: selectedhero.ability })
+        .update({ abilityUse: "yes" });
     } catch (error) {
       console.error("Erreur lors de la mise à jour du héros :", error);
       // Gérer l'erreur ici
@@ -359,7 +360,7 @@ io.on("connection", async (socket) => {
     let heroes = await db("users")
       .whereNot("team", "boss")
       .andWhere("gameId", socket.data.gameId)
-      .andWhere("room", boss.room); //@TODO :bug ?
+      .andWhere("room", boss.room);
 
     if (heroes.length > 0) {
       console.log("battle");
@@ -379,6 +380,7 @@ io.on("connection", async (socket) => {
     console.log(user);
     await db("users").where({ id: user.id }).update({ life: 3 });
     reloadUsers();
+    io.emit("saveYou", user.id);
   });
 
   socket.on("healUser", async (user) => {
@@ -386,6 +388,13 @@ io.on("connection", async (socket) => {
     let targetLife = user.life + 1;
     await db("users").where({ id: user.id }).update({ life: targetLife });
     reloadUsers();
+  });
+
+  socket.on("nerfDices", () => {
+    io.emit("isNerfingDices");
+  });
+  socket.on("undoNerfDices", () => {
+    io.emit("undoNerfingDices");
   });
 
   socket.on("battleEnded", async (data) => {
@@ -418,6 +427,11 @@ io.on("connection", async (socket) => {
       .whereNot("team", "boss")
       .andWhere("gameId", socket.data.gameId)
       .andWhere("room", data.room);
+
+    console.log(data);
+    console.log(heroes);
+
+    if (heroes.length < 1) return;
 
     let min = (a, f) => a.reduce((m, x) => (m[f] < x[f] ? m : x));
 

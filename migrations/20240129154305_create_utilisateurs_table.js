@@ -10,6 +10,7 @@ const up = function (knex) {
     table.string("color"); // update quand le joueur à choisi son hero
     table.string("abilityName"); // update quand le joueur à choisi son hero
     table.string("ability"); // update quand le joueur à choisi son hero
+    table.string("abilityUse"); // update quand le joueur à choisi son hero
     table.string("player"); // update quand le joueur à choisi son hero
     table.integer("life"); // update quand le joueur perd une vie
     table.integer("atk"); // update quand le joueur à choisi son hero et quand il gagne un item

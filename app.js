@@ -328,7 +328,6 @@ io.on("connection", async (socket) => {
         .update({ color: selectedhero.color })
         .update({ abilityName: selectedhero.abilityName })
         .update({ ability: selectedhero.ability })
-        .update({ abilityUse: "yes" });
     } catch (error) {
       console.error("Erreur lors de la mise à jour du héros :", error);
       // Gérer l'erreur ici

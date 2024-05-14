@@ -105,13 +105,12 @@ io.on("connection", async (socket) => {
     let user = await db("users").where("id", socket.data.userId).first();
     let userDef = user.def;
     let userAtk = user.atk;
-    console.log("user: ", userDef, " , ", userAtk);
     let inventory = user.inventory;
+    console.log(inventory);
     if (inventory) inventory = inventory + "/" + item;
     if (!inventory) inventory = item;
 
-    console.log("item : ", itemJson);
-    console.log(itemJson.bonus);
+    console.log(inventory);
 
     if (itemJson.type == "def") userDef = userDef + Number(itemJson.bonus);
     if (itemJson.type == "atk") userAtk = userAtk + Number(itemJson.bonus);
@@ -327,7 +326,7 @@ io.on("connection", async (socket) => {
         .update({ def: selectedhero.baseLife })
         .update({ color: selectedhero.color })
         .update({ abilityName: selectedhero.abilityName })
-        .update({ ability: selectedhero.ability })
+        .update({ ability: selectedhero.ability });
     } catch (error) {
       console.error("Erreur lors de la mise à jour du héros :", error);
       // Gérer l'erreur ici
@@ -367,6 +366,11 @@ io.on("connection", async (socket) => {
       return;
     }
 
+    // await db("users")
+    //   .where("team", "boss")
+    //   .andWhere("gameId", socket.data.gameId)
+    //   .update("inventory", "");
+
     socket.emit("movePlayer", socket.data.userId);
   });
 
@@ -394,6 +398,34 @@ io.on("connection", async (socket) => {
   });
   socket.on("undoNerfDices", () => {
     io.emit("undoNerfingDices");
+  });
+
+  socket.on("dropARock", async (rock) => {
+    if (rock.def == 0) return;
+    if (rock.def == 5) rock.nameId = "rockRare";
+    if (rock.def == 10) rock.nameId = "rockRare";
+    if (rock.def == 15) rock.nameId = "rockLegendary";
+
+    return;
+
+    let boss = await db("users")
+      .where("team", "boss")
+      .andWhere("gameId", socket.data.gameId)
+      .first();
+
+    let inventory = boss.inventory;
+    if (inventory) inventory = inventory + "/" + rock;
+    if (!inventory) inventory = rock;
+    console.log(inventory);
+
+    await db("users")
+      .where("team", "boss")
+      .andWhere("gameId", socket.data.gameId)
+      .update("inventory", inventory)
+      .update("def", boss.def + rock.def);
+    console.log(inventory);
+
+    reloadUsers();
   });
 
   socket.on("battleEnded", async (data) => {

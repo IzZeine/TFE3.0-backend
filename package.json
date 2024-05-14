@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "updateKnex": "del db.sqlite3 && npx knex migrate:latest",
+    "updateKnex": "rimraf db.sqlite3 && npx knex migrate:latest",
     "knex": "npx knex migrate:latest",
     "server": "node app.js",
     "start": "npm-run-all knex server",
@@ -22,8 +22,12 @@
     "knex": "^3.1.0",
     "nodemon": "^3.1.0",
     "npm-run-all": "^4.1.5",
+    "rimraf": "^5.0.7",
     "socket.io": "^4.7.4",
     "sqlite3": "^5.1.7",
     "uuidv4": "^6.2.13"
+  },
+  "devDependencies": {
+    "prettier": "^3.2.5"
   }
 }

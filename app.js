@@ -56,7 +56,7 @@ let initializationRooms = async (gameID) => {
     let randomIndexForKey = generateRandomIndexForKey(rowCount);
     for (let i = 0; i < rowCount; i++) {
       let randomIndex = Math.floor(
-        Math.random() * (arrayOfItems.length - 1) // -1 pour ne pas avoir la key (qui est le dernier item du JSON)
+        Math.random() * (arrayOfItems.length - 1), // -1 pour ne pas avoir la key (qui est le dernier item du JSON)
       );
       let chosenItem = arrayOfItems[randomIndex];
       if (i == 0 || i == numberOfSafeRoom) chosenItem = null;
@@ -245,7 +245,7 @@ io.on("connection", async (socket) => {
     if (!socket.data.userId || !socket.data.gameId) return;
 
     console.log(
-      `L'utilisateur avec l'ID ${socket.data.userId} s'est déconnecté`
+      `L'utilisateur avec l'ID ${socket.data.userId} s'est déconnecté`,
     );
 
     // Supprime l'ID de socket de la map des utilisateurs connectés
@@ -318,15 +318,18 @@ io.on("connection", async (socket) => {
       // await db("users")
       //   .where({ id: socket.data.userId })
       //   .update({ def: selectedhero.baseLife });
+      console.log(selectedhero)
       await db("users")
         .where({ id: socket.data.userId })
-        .update({ heroImg: selectedhero.img })
-        .update({ hero: selectedhero.name })
-        .update({ atk: selectedhero.baseAtk })
-        .update({ def: selectedhero.baseLife })
-        .update({ color: selectedhero.color })
-        .update({ abilityName: selectedhero.abilityName })
-        .update({ ability: selectedhero.ability });
+        .update({
+          heroImg: selectedhero.img,
+          hero: selectedhero.name,
+          atk: selectedhero.baseAtk,
+          def: selectedhero.baseLife,
+          color: selectedhero.color,
+          abilityName: selectedhero.abilityName,
+          ability: selectedhero.ability
+        });
     } catch (error) {
       console.error("Erreur lors de la mise à jour du héros :", error);
       // Gérer l'erreur ici

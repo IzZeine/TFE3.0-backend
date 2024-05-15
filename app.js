@@ -408,8 +408,10 @@ io.on("connection", async (socket) => {
 
   socket.on("battleEnded", async (data) => {
     if (!socket.data.userId && !socket.data.gameId) return;
+    let winner = data;
+
     if (data == "endGame") {
-      let winner = "hero";
+      winner = "hero";
       endGame(winner);
       return;
     }
@@ -427,7 +429,7 @@ io.on("connection", async (socket) => {
         .andWhere("room", data)
         .update("room", 38);
 
-      io.emit("returnAtSpawn");
+      io.emit("returnAtSpawn", winner);
       reloadUsers();
       return;
     }
@@ -460,7 +462,7 @@ io.on("connection", async (socket) => {
       .andWhere("room", data.room)
       .update("room", 38);
 
-    io.emit("returnAtSpawn");
+    io.emit("returnAtSpawn", winner);
 
     reloadUsers();
   });

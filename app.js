@@ -106,20 +106,17 @@ io.on("connection", async (socket) => {
     let userDef = user.def;
     let userAtk = user.atk;
     let inventory = user.inventory;
-    console.log(inventory);
     if (inventory) inventory = inventory + "/" + item;
     if (!inventory) inventory = item;
-
-    console.log(inventory);
 
     if (itemJson.type == "def") userDef = userDef + Number(itemJson.bonus);
     if (itemJson.type == "atk") userAtk = userAtk + Number(itemJson.bonus);
 
-    await db("users")
-      .where("id", socket.data.userId)
-      .update("inventory", inventory)
-      .update("def", userDef)
-      .update("atk", userAtk);
+    await db("users").where("id", socket.data.userId).update({
+      inventory: inventory,
+      def: userDef,
+      atk: userAtk,
+    });
 
     user = await db("users").where("id", socket.data.userId).first();
 
@@ -169,13 +166,8 @@ io.on("connection", async (socket) => {
         await trx("users").insert({
           id: userID,
           username: name,
-          inventory_id: userID, // Utiliser le même ID pour l'inventaire
           room: "0",
           life: 3,
-        });
-        await trx("inventory").insert({
-          id: userID, // Utiliser le même ID pour l'inventaire
-          user_id: userID, // Utiliser le même ID pour l'utilisateur
         });
       });
 
@@ -194,14 +186,12 @@ io.on("connection", async (socket) => {
     await db("games").where({ gameId: id }).update({ statut: "closed" });
     let activeUsersKeys = Array.from(activeUsers.keys());
     for (const id of activeUsersKeys) {
-      await db("users").where("id", id).update({ team: "hero" });
-      await db("users").where("id", id).update({ room: 0 });
+      await db("users").where("id", id).update({ team: "hero", room: 0 });
     }
     let indexAleatoire = Math.floor(Math.random() * activeUsersKeys.length);
     await db("users")
       .where("id", activeUsersKeys[indexAleatoire])
-      .update({ team: "boss" })
-      .update({ room: 38 });
+      .update({ team: "boss", room: 38 });
 
     reloadUsers();
     updateGame(id);
@@ -212,10 +202,9 @@ io.on("connection", async (socket) => {
     await db("games").where({ gameId: id }).update({ statut: "waiting" });
 
     for (const id of activeUsersKeys) {
-      await db("users").where("id", id).update({ team: null });
-      await db("users").where("id", id).update({ hero: null });
-      await db("users").where("id", id).update({ atk: null });
-      await db("users").where("id", id).update({ def: null });
+      await db("users")
+        .where("id", id)
+        .update({ team: null, hero: null, atk: null, def: null });
     }
 
     reloadUsers();
@@ -277,9 +266,6 @@ io.on("connection", async (socket) => {
         activeUsers.set(socket.data.userId, true);
         activeUsers.delete(null);
         await db("users")
-          .where({ id: socket.data.userId })
-          .update({ gameId: id });
-        await db("inventory")
           .where({ id: socket.data.userId })
           .update({ gameId: id });
         await db("games")
@@ -354,11 +340,6 @@ io.on("connection", async (socket) => {
       return;
     }
 
-    // await db("users")
-    //   .where("team", "boss")
-    //   .andWhere("gameId", socket.data.gameId)
-    //   .update("inventory", "");
-
     socket.emit("movePlayer", socket.data.userId);
   });
 
@@ -366,6 +347,15 @@ io.on("connection", async (socket) => {
     if (!socket.data.userId && !socket.data.gameId) return;
     updateRooms(data);
     reloadUsers();
+    io.emit("takeItemInRoom", data.name);
+  });
+
+  socket.on("useAbility", async (data) => {
+    let user = await db("users").where({ id: socket.data.userId }).first();
+    let id = user.id;
+    let hero = user.hero;
+    if (data.id) id = data.id;
+    io.emit("usedPower", id, hero);
   });
 
   socket.on("saveUser", async (user) => {
@@ -388,7 +378,6 @@ io.on("connection", async (socket) => {
   });
 
   socket.on("dropARock", async (rock) => {
-    console.log(rock);
     if (rock.def == 0) return;
     if (rock.def == 5) rock.nameId = "rock";
     if (rock.def == 10) rock.nameId = "rockRare";
@@ -397,8 +386,6 @@ io.on("connection", async (socket) => {
     let rockString = rock;
     rockString.def = rockString.def.toString();
     rockString = JSON.stringify(rockString);
-    console.log(rockString);
-    console.log(rock);
 
     let boss = await db("users")
       .where("team", "boss")
@@ -408,16 +395,13 @@ io.on("connection", async (socket) => {
     let inventory = boss.inventory;
     if (inventory) inventory = inventory + "/" + rockString;
     if (!inventory) inventory = rockString;
-    console.log(inventory);
 
     await db("users")
       .where("team", "boss")
       .andWhere("gameId", socket.data.gameId)
-      .update("inventory", inventory)
-      // .update("def", 250);
-      .update("def", boss.def + parseInt(rock.def));
+      .update({ inventory: inventory, def: boss.def + parseInt(rock.def) });
 
-    console.log(inventory);
+    io.emit("takeItemInRoom", "room" + boss.room, boss);
 
     reloadUsers();
   });

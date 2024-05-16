@@ -428,7 +428,7 @@ io.on("connection", async (socket) => {
     if (!socket.data.userId && !socket.data.gameId) return;
     let winner = data;
 
-    if (typeof data === "array") {
+    if (Array.isArray(data)) {
       winner = "hero";
       endGame(winner, socket.data.gameId);
       return;
@@ -452,10 +452,14 @@ io.on("connection", async (socket) => {
       return;
     }
 
+    console.log(data);
+
     let heroes = await db("users")
       .whereNot("team", "boss")
       .andWhere("gameId", socket.data.gameId)
       .andWhere("room", data.room);
+
+    console.log(heroes);
 
     if (heroes.length < 1) return;
 

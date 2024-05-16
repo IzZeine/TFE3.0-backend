@@ -161,6 +161,10 @@ io.on("connection", async (socket) => {
     await reloadUsers();
   });
 
+  socket.on("playSound", (data) => {
+    io.emit("playThisSound", data);
+  });
+
   socket.on("getMyUser", async (id) => {
     if (!id) return;
     let myUser = await db("users").where("id", id).first();

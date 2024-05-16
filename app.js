@@ -7,7 +7,6 @@ import { v4 as uuidv4 } from "uuid";
 import cors from "cors";
 import routing from "./routing.js";
 import itemJson from "./items.json" assert { type: "json" };
-import roomsConnections from "./roomsConnections.json" assert { type: "json" };
 
 // @TODO : faire des modules plutot qu'un énorme JS
 import db from "./db.js";
@@ -37,6 +36,22 @@ app.use(function (req, res, next) {
 });
 
 routing(app);
+
+async function resetAllDataBase() {
+  await db("users").truncate();
+  await db("games").truncate();
+  await db("rooms").truncate();
+}
+
+async function resetGameDataBase(id) {
+  console.log("done");
+  // @TODO
+}
+
+async function resetPlayerDataBase(id) {
+  console.log("done");
+  // @TODO
+}
 
 function generateRandomIndexForKey(rowCount) {
   var num = Math.floor(Math.random() * rowCount);
@@ -80,20 +95,6 @@ let initializationRooms = async (gameID) => {
 io.on("connection", async (socket) => {
   io.emit("updateUsersCount", activeUsers.size);
 
-  let reloadUsers = async () => {
-    let users = [];
-    let activeUsersKeys = Array.from(activeUsers.keys());
-
-    for (const id of activeUsersKeys) {
-      let user = await db("users").where("id", id).first();
-      users.push(user);
-    }
-
-    io.emit("updateUsers", users);
-  };
-
-  reloadUsers();
-
   let updateGame = async (id) => {
     let game = await db("games").where("gameId", id).first();
     io.emit("updateGame", game);
@@ -130,18 +131,35 @@ io.on("connection", async (socket) => {
     io.emit("youAskedRooms", rooms);
   };
 
-  let endGame = async (winner) => {
-    await db("games")
-      .where({ gameId: socket.data.gameId })
-      .update({ statut: "ended" });
+  let endGame = async (winner, gameId) => {
+    await db("games").where({ gameId: gameId }).update({ statut: "ended" });
 
     let teamWinner = await db("users")
-      .where({ gameId: socket.data.gameId })
+      .where({ gameId: gameId })
       .andWhere("team", winner);
 
-    updateGame(socket.data.gameId);
+    updateGame(gameId);
     io.emit("endGame", teamWinner);
   };
+
+  let reloadUsers = async () => {
+    let users = [];
+    let activeUsersKeys = Array.from(activeUsers.keys());
+
+    for (const id of activeUsersKeys) {
+      let user = await db("users").where("id", id).first();
+      users.push(user);
+    }
+
+    io.emit("updateUsers", users);
+  };
+
+  reloadUsers();
+
+  socket.on("clearAllDataBase", async () => {
+    await resetAllDataBase();
+    await reloadUsers();
+  });
 
   socket.on("getMyUser", async (id) => {
     if (!id) return;
@@ -410,9 +428,9 @@ io.on("connection", async (socket) => {
     if (!socket.data.userId && !socket.data.gameId) return;
     let winner = data;
 
-    if (data == "endGame") {
+    if (typeof data === "array") {
       winner = "hero";
-      endGame(winner);
+      endGame(winner, socket.data.gameId);
       return;
     }
 
@@ -449,6 +467,18 @@ io.on("connection", async (socket) => {
       .where("id", weakestHero.id)
       .update("life", weakestHero.life - 1);
     if (weakestHero.life <= 0) console.log("t'es mort");
+
+    let allHeroes = await db("users")
+      .whereNot("team", "boss")
+      .andWhere("gameId", socket.data.gameId);
+
+    let heroesDead = allHeroes.every((hero) => hero.life <= 0);
+    console.log(heroesDead);
+
+    if (heroesDead) {
+      await endGame("boss", socket.data.gameId);
+      return;
+    }
 
     await db("users")
       .whereNot("team", "boss")

@@ -15,10 +15,8 @@ import db from "./db.js";
 let gameID;
 
 const maxUsersOnline = 6;
-
-let activeUsers = new Map();
-
-let arrayOfItems = Object.values(itemJson); // passer le Json en array pour utiliser les index plus facilement
+const activeUsers = new Map();
+const arrayOfItems = Object.values(itemJson); // passer le Json en array pour utiliser les index plus facilement
 
 const app = express();
 const server = createServer(app);
@@ -43,7 +41,7 @@ function generateRandomIndexForKey(rowCount) {
   return num === 0 || num === 19 ? generateRandomIndexForKey() : num;
 }
 
-let initializationRooms = async (gameID) => {
+const initializationRooms = async (gameID) => {
   let id = gameID;
   let myGame = await db("games").where("gameId", id).first();
   let myRooms = await db("rooms").where("gameId", id);
@@ -80,7 +78,7 @@ let initializationRooms = async (gameID) => {
 io.on("connection", async (socket) => {
   io.emit("updateUsersCount", activeUsers.size);
 
-  let reloadUsers = async () => {
+  const reloadUsers = async () => {
     let users = [];
     let activeUsersKeys = Array.from(activeUsers.keys());
 
@@ -94,7 +92,7 @@ io.on("connection", async (socket) => {
 
   reloadUsers();
 
-  let updateGame = async (id) => {
+  const updateGame = async (id) => {
     let game = await db("games").where("gameId", id).first();
     io.emit("updateGame", game);
   };
@@ -117,9 +115,7 @@ io.on("connection", async (socket) => {
 
     await db("users")
       .where("id", socket.data.userId)
-      .update("inventory", inventory)
-      .update("def", userDef)
-      .update("atk", userAtk);
+      .update({ inventory: inventory, def: userDef, atk: userAtk });
 
     user = await db("users").where("id", socket.data.userId).first();
 
@@ -194,14 +190,12 @@ io.on("connection", async (socket) => {
     await db("games").where({ gameId: id }).update({ statut: "closed" });
     let activeUsersKeys = Array.from(activeUsers.keys());
     for (const id of activeUsersKeys) {
-      await db("users").where("id", id).update({ team: "hero" });
-      await db("users").where("id", id).update({ room: 0 });
+      await db("users").where("id", id).update({ team: "hero", room: 0 });
     }
     let indexAleatoire = Math.floor(Math.random() * activeUsersKeys.length);
     await db("users")
       .where("id", activeUsersKeys[indexAleatoire])
-      .update({ team: "boss" })
-      .update({ room: 38 });
+      .update({ team: "boss", room: 38 });
 
     reloadUsers();
     updateGame(id);
@@ -212,10 +206,9 @@ io.on("connection", async (socket) => {
     await db("games").where({ gameId: id }).update({ statut: "waiting" });
 
     for (const id of activeUsersKeys) {
-      await db("users").where("id", id).update({ team: null });
-      await db("users").where("id", id).update({ hero: null });
-      await db("users").where("id", id).update({ atk: null });
-      await db("users").where("id", id).update({ def: null });
+      await db("users")
+        .where("id", id)
+        .update({ team: null, hero: null, atk: null, def: null });
     }
 
     reloadUsers();
@@ -290,7 +283,7 @@ io.on("connection", async (socket) => {
         await reloadUsers();
       }
     } catch (error) {
-      console.error("Erreur lors de connaction à la partie :", error);
+      console.error("Erreur lors de connection à la partie :", error);
       // Gérer l'erreur ici
     }
   });
@@ -318,18 +311,16 @@ io.on("connection", async (socket) => {
       // await db("users")
       //   .where({ id: socket.data.userId })
       //   .update({ def: selectedhero.baseLife });
-      console.log(selectedhero)
-      await db("users")
-        .where({ id: socket.data.userId })
-        .update({
-          heroImg: selectedhero.img,
-          hero: selectedhero.name,
-          atk: selectedhero.baseAtk,
-          def: selectedhero.baseLife,
-          color: selectedhero.color,
-          abilityName: selectedhero.abilityName,
-          ability: selectedhero.ability
-        });
+      console.log(selectedhero);
+      await db("users").where({ id: socket.data.userId }).update({
+        heroImg: selectedhero.img,
+        hero: selectedhero.name,
+        atk: selectedhero.baseAtk,
+        def: selectedhero.baseLife,
+        color: selectedhero.color,
+        abilityName: selectedhero.abilityName,
+        ability: selectedhero.ability,
+      });
     } catch (error) {
       console.error("Erreur lors de la mise à jour du héros :", error);
       // Gérer l'erreur ici
@@ -351,8 +342,6 @@ io.on("connection", async (socket) => {
       .where({ id: socket.data.userId })
       .update({ room: targetRoom });
 
-    await reloadUsers();
-
     let boss = await db("users")
       .where("gameId", socket.data.gameId)
       .andWhere("team", "boss")
@@ -368,13 +357,13 @@ io.on("connection", async (socket) => {
       io.emit("battle", { heroes: heroes, boss: boss, room: targetRoom });
       return;
     }
-
     // await db("users")
     //   .where("team", "boss")
     //   .andWhere("gameId", socket.data.gameId)
     //   .update("inventory", "");
 
-    socket.emit("movePlayer", socket.data.userId);
+    //socket.emit("movePlayer", socket.data.userId);
+    await reloadUsers();
   });
 
   socket.on("getItemInRoom", async (data) => {
@@ -385,7 +374,7 @@ io.on("connection", async (socket) => {
   socket.on("saveUser", async (user) => {
     console.log(user);
     await db("users").where({ id: user.id }).update({ life: 3 });
-    reloadUsers();
+    await reloadUsers();
     io.emit("saveYou", user.id);
   });
 
@@ -393,7 +382,7 @@ io.on("connection", async (socket) => {
     console.log(user);
     let targetLife = user.life + 1;
     await db("users").where({ id: user.id }).update({ life: targetLife });
-    reloadUsers();
+    await reloadUsers();
   });
 
   socket.on("nerfDices", () => {
@@ -428,7 +417,7 @@ io.on("connection", async (socket) => {
       .update("def", boss.def + rock.def);
     console.log(inventory);
 
-    reloadUsers();
+    await reloadUsers();
   });
 
   socket.on("battleEnded", async (data) => {
@@ -453,7 +442,7 @@ io.on("connection", async (socket) => {
         .update("room", 38);
 
       io.emit("returnAtSpawn");
-      reloadUsers();
+      await reloadUsers();
       return;
     }
 
@@ -492,7 +481,7 @@ io.on("connection", async (socket) => {
 
     console.log(data);
 
-    reloadUsers();
+    await reloadUsers();
   });
 });
 

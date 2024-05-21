@@ -17,8 +17,6 @@ const up = function (knex) {
     table.string("team"); // choisir quand tout le monde est connecté et que la partie commence
     table.integer("room"); // update à chaque changement de salle
     table.jsonb("inventory").defaultTo("");
-    table.string("inventory_id").unsigned(); // Clé étrangère vers la table d'inventaire
-    table.foreign("inventory_id").references("inventory.id");
     table.timestamps(true, true);
   });
 };

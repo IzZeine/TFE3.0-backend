@@ -7,7 +7,6 @@ import { v4 as uuidv4 } from "uuid";
 import cors from "cors";
 import routing from "./routing.js";
 import itemJson from "./items.json" assert { type: "json" };
-import roomsConnections from "./roomsConnections.json" assert { type: "json" };
 
 // @TODO : faire des modules plutot qu'un énorme JS
 import db from "./db.js";
@@ -15,8 +14,10 @@ import db from "./db.js";
 let gameID;
 
 const maxUsersOnline = 6;
-const activeUsers = new Map();
-const arrayOfItems = Object.values(itemJson); // passer le Json en array pour utiliser les index plus facilement
+
+let activeUsers = new Map();
+
+let arrayOfItems = Object.values(itemJson); // passer le Json en array pour utiliser les index plus facilement
 
 const app = express();
 const server = createServer(app);
@@ -36,12 +37,28 @@ app.use(function (req, res, next) {
 
 routing(app);
 
+async function resetAllDataBase() {
+  await db("users").truncate();
+  await db("games").truncate();
+  await db("rooms").truncate();
+}
+
+async function resetGameDataBase(id) {
+  console.log("done");
+  // @TODO
+}
+
+async function resetPlayerDataBase(id) {
+  console.log("done");
+  // @TODO
+}
+
 function generateRandomIndexForKey(rowCount) {
   var num = Math.floor(Math.random() * rowCount);
   return num === 0 || num === 19 ? generateRandomIndexForKey() : num;
 }
 
-const initializationRooms = async (gameID) => {
+let initializationRooms = async (gameID) => {
   let id = gameID;
   let myGame = await db("games").where("gameId", id).first();
   let myRooms = await db("rooms").where("gameId", id);
@@ -54,7 +71,7 @@ const initializationRooms = async (gameID) => {
     let randomIndexForKey = generateRandomIndexForKey(rowCount);
     for (let i = 0; i < rowCount; i++) {
       let randomIndex = Math.floor(
-        Math.random() * (arrayOfItems.length - 1), // -1 pour ne pas avoir la key (qui est le dernier item du JSON)
+        Math.random() * (arrayOfItems.length - 1) // -1 pour ne pas avoir la key (qui est le dernier item du JSON)
       );
       let chosenItem = arrayOfItems[randomIndex];
       if (i == 0 || i == numberOfSafeRoom) chosenItem = null;
@@ -78,21 +95,7 @@ const initializationRooms = async (gameID) => {
 io.on("connection", async (socket) => {
   io.emit("updateUsersCount", activeUsers.size);
 
-  const reloadUsers = async () => {
-    let users = [];
-    let activeUsersKeys = Array.from(activeUsers.keys());
-
-    for (const id of activeUsersKeys) {
-      let user = await db("users").where("id", id).first();
-      users.push(user);
-    }
-
-    io.emit("updateUsers", users);
-  };
-
-  reloadUsers();
-
-  const updateGame = async (id) => {
+  let updateGame = async (id) => {
     let game = await db("games").where("gameId", id).first();
     io.emit("updateGame", game);
   };
@@ -104,18 +107,17 @@ io.on("connection", async (socket) => {
     let userDef = user.def;
     let userAtk = user.atk;
     let inventory = user.inventory;
-    console.log(inventory);
     if (inventory) inventory = inventory + "/" + item;
     if (!inventory) inventory = item;
-
-    console.log(inventory);
 
     if (itemJson.type == "def") userDef = userDef + Number(itemJson.bonus);
     if (itemJson.type == "atk") userAtk = userAtk + Number(itemJson.bonus);
 
-    await db("users")
-      .where("id", socket.data.userId)
-      .update({ inventory: inventory, def: userDef, atk: userAtk });
+    await db("users").where("id", socket.data.userId).update({
+      inventory: inventory,
+      def: userDef,
+      atk: userAtk,
+    });
 
     user = await db("users").where("id", socket.data.userId).first();
 
@@ -129,18 +131,39 @@ io.on("connection", async (socket) => {
     io.emit("youAskedRooms", rooms);
   };
 
-  let endGame = async (winner) => {
-    await db("games")
-      .where({ gameId: socket.data.gameId })
-      .update({ statut: "ended" });
+  let endGame = async (winner, gameId) => {
+    await db("games").where({ gameId: gameId }).update({ statut: "ended" });
 
     let teamWinner = await db("users")
-      .where({ gameId: socket.data.gameId })
+      .where({ gameId: gameId })
       .andWhere("team", winner);
 
-    updateGame(socket.data.gameId);
+    updateGame(gameId);
     io.emit("endGame", teamWinner);
   };
+
+  let reloadUsers = async () => {
+    let users = [];
+    let activeUsersKeys = Array.from(activeUsers.keys());
+
+    for (const id of activeUsersKeys) {
+      let user = await db("users").where("id", id).first();
+      users.push(user);
+    }
+
+    io.emit("updateUsers", users);
+  };
+
+  reloadUsers();
+
+  socket.on("clearAllDataBase", async () => {
+    await resetAllDataBase();
+    await reloadUsers();
+  });
+
+  socket.on("playSound", (data) => {
+    io.emit("playThisSound", data);
+  });
 
   socket.on("getMyUser", async (id) => {
     if (!id) return;
@@ -165,13 +188,8 @@ io.on("connection", async (socket) => {
         await trx("users").insert({
           id: userID,
           username: name,
-          inventory_id: userID, // Utiliser le même ID pour l'inventaire
           room: "0",
           life: 3,
-        });
-        await trx("inventory").insert({
-          id: userID, // Utiliser le même ID pour l'inventaire
-          user_id: userID, // Utiliser le même ID pour l'utilisateur
         });
       });
 
@@ -238,7 +256,7 @@ io.on("connection", async (socket) => {
     if (!socket.data.userId || !socket.data.gameId) return;
 
     console.log(
-      `L'utilisateur avec l'ID ${socket.data.userId} s'est déconnecté`,
+      `L'utilisateur avec l'ID ${socket.data.userId} s'est déconnecté`
     );
 
     // Supprime l'ID de socket de la map des utilisateurs connectés
@@ -272,9 +290,6 @@ io.on("connection", async (socket) => {
         await db("users")
           .where({ id: socket.data.userId })
           .update({ gameId: id });
-        await db("inventory")
-          .where({ id: socket.data.userId })
-          .update({ gameId: id });
         await db("games")
           .where({ gameId: id })
           .update({ users: activeUsers.size });
@@ -283,7 +298,7 @@ io.on("connection", async (socket) => {
         await reloadUsers();
       }
     } catch (error) {
-      console.error("Erreur lors de connection à la partie :", error);
+      console.error("Erreur lors de connaction à la partie :", error);
       // Gérer l'erreur ici
     }
   });
@@ -299,19 +314,6 @@ io.on("connection", async (socket) => {
     if (!socket.data.userId && !socket.data.gameId) return;
     try {
       // Mettre à jour le champ 'hero' dans la table 'users'
-      // await db("users")
-      //   .where({ id: socket.data.userId })
-      //   .update({ heroImg: selectedhero.img });
-      // await db("users")
-      //   .where({ id: socket.data.userId })
-      //   .update({ hero: selectedhero.name });
-      // await db("users")
-      //   .where({ id: socket.data.userId })
-      //   .update({ atk: selectedhero.baseAtk });
-      // await db("users")
-      //   .where({ id: socket.data.userId })
-      //   .update({ def: selectedhero.baseLife });
-      console.log(selectedhero);
       await db("users").where({ id: socket.data.userId }).update({
         heroImg: selectedhero.img,
         hero: selectedhero.name,
@@ -342,6 +344,8 @@ io.on("connection", async (socket) => {
       .where({ id: socket.data.userId })
       .update({ room: targetRoom });
 
+    await reloadUsers();
+
     let boss = await db("users")
       .where("gameId", socket.data.gameId)
       .andWhere("team", "boss")
@@ -357,32 +361,35 @@ io.on("connection", async (socket) => {
       io.emit("battle", { heroes: heroes, boss: boss, room: targetRoom });
       return;
     }
-    // await db("users")
-    //   .where("team", "boss")
-    //   .andWhere("gameId", socket.data.gameId)
-    //   .update("inventory", "");
 
-    //socket.emit("movePlayer", socket.data.userId);
-    await reloadUsers();
+    socket.emit("movePlayer", socket.data.userId);
   });
 
   socket.on("getItemInRoom", async (data) => {
     if (!socket.data.userId && !socket.data.gameId) return;
     updateRooms(data);
+    reloadUsers();
+    io.emit("takeItemInRoom", data.name);
+  });
+
+  socket.on("useAbility", async (data) => {
+    let user = await db("users").where({ id: socket.data.userId }).first();
+    let id = user.id;
+    let hero = user.hero;
+    if (data.id) id = data.id;
+    io.emit("usedPower", id, hero);
   });
 
   socket.on("saveUser", async (user) => {
-    console.log(user);
     await db("users").where({ id: user.id }).update({ life: 3 });
-    await reloadUsers();
+    reloadUsers();
     io.emit("saveYou", user.id);
   });
 
   socket.on("healUser", async (user) => {
-    console.log(user);
     let targetLife = user.life + 1;
     await db("users").where({ id: user.id }).update({ life: targetLife });
-    await reloadUsers();
+    reloadUsers();
   });
 
   socket.on("nerfDices", () => {
@@ -394,11 +401,13 @@ io.on("connection", async (socket) => {
 
   socket.on("dropARock", async (rock) => {
     if (rock.def == 0) return;
-    if (rock.def == 5) rock.nameId = "rockRare";
+    if (rock.def == 5) rock.nameId = "rock";
     if (rock.def == 10) rock.nameId = "rockRare";
     if (rock.def == 15) rock.nameId = "rockLegendary";
 
-    return;
+    let rockString = rock;
+    rockString.def = rockString.def.toString();
+    rockString = JSON.stringify(rockString);
 
     let boss = await db("users")
       .where("team", "boss")
@@ -406,25 +415,26 @@ io.on("connection", async (socket) => {
       .first();
 
     let inventory = boss.inventory;
-    if (inventory) inventory = inventory + "/" + rock;
-    if (!inventory) inventory = rock;
-    console.log(inventory);
+    if (inventory) inventory = inventory + "/" + rockString;
+    if (!inventory) inventory = rockString;
 
     await db("users")
       .where("team", "boss")
       .andWhere("gameId", socket.data.gameId)
-      .update("inventory", inventory)
-      .update("def", boss.def + rock.def);
-    console.log(inventory);
+      .update({ inventory: inventory, def: boss.def + parseInt(rock.def) });
 
-    await reloadUsers();
+    io.emit("takeItemInRoom", "room" + boss.room, boss);
+
+    reloadUsers();
   });
 
   socket.on("battleEnded", async (data) => {
     if (!socket.data.userId && !socket.data.gameId) return;
-    if (data == "endGame") {
-      let winner = "hero";
-      endGame(winner);
+    let winner = data;
+
+    if (Array.isArray(data)) {
+      winner = "hero";
+      endGame(winner, socket.data.gameId);
       return;
     }
 
@@ -441,17 +451,18 @@ io.on("connection", async (socket) => {
         .andWhere("room", data)
         .update("room", 38);
 
-      io.emit("returnAtSpawn");
-      await reloadUsers();
+      io.emit("returnAtSpawn", winner);
+      reloadUsers();
       return;
     }
+
+    console.log(data);
 
     let heroes = await db("users")
       .whereNot("team", "boss")
       .andWhere("gameId", socket.data.gameId)
       .andWhere("room", data.room);
 
-    console.log(data);
     console.log(heroes);
 
     if (heroes.length < 1) return;
@@ -465,6 +476,18 @@ io.on("connection", async (socket) => {
       .update("life", weakestHero.life - 1);
     if (weakestHero.life <= 0) console.log("t'es mort");
 
+    let allHeroes = await db("users")
+      .whereNot("team", "boss")
+      .andWhere("gameId", socket.data.gameId);
+
+    let heroesDead = allHeroes.every((hero) => hero.life <= 0);
+    console.log(heroesDead);
+
+    if (heroesDead) {
+      await endGame("boss", socket.data.gameId);
+      return;
+    }
+
     await db("users")
       .whereNot("team", "boss")
       .andWhere("gameId", socket.data.gameId)
@@ -477,11 +500,9 @@ io.on("connection", async (socket) => {
       .andWhere("room", data.room)
       .update("room", 38);
 
-    io.emit("returnAtSpawn");
+    io.emit("returnAtSpawn", winner);
 
-    console.log(data);
-
-    await reloadUsers();
+    reloadUsers();
   });
 });
 

@@ -3,7 +3,7 @@
     "name": "Chevalier",
     "baseLife": "50",
     "baseAtk": "10",
-    "abilityName" : "Rescousse",
+    "abilityName": "Rescousse",
     "ability": "Le chevalier dépasse ses limites pour se déplacer plus vite et rejoindre ses alliés en danger (ou fuir un boss un peu trop fort pour lui).",
     "color": "#949494",
     "img": "knight.png"
@@ -12,7 +12,7 @@
     "name": "Magicien",
     "baseLife": "40",
     "baseAtk": "15",
-    "abilityName" : "Chance",
+    "abilityName": "Chance",
     "ability": "Le magicien essaye d'augmenter ses chances. Il gagne (ou pas) bonus sur le prochain lancé de dés.",
     "color": "#41708C",
     "img": "wizard.png"
@@ -21,25 +21,25 @@
     "name": "Rodeur",
     "baseLife": "40",
     "baseAtk": "15",
-    "abilityName" : "Téléportation",
+    "abilityName": "Téléportation",
     "ability": "Le rodeur peut se téléporter dans une salle aléatoire parmi 5 choix dans le donjon.",
     "color": "#E35457",
     "img": "rodeur.png"
   },
-  "death": {
+  "necromancer": {
     "name": "Necromancien",
     "baseLife": "50",
     "baseAtk": "10",
-    "abilityName" : "Réincarnation",
+    "abilityName": "Réincarnation",
     "ability": "Le nécromancien peut ramener à la vie un de ses alliés décédé.",
     "color": "#B90404",
-    "img": "death.png"
+    "img": "necromancer.png"
   },
   "druide": {
     "name": "Druide",
     "baseLife": "50",
     "baseAtk": "10",
-    "abilityName" : "Secours",
+    "abilityName": "Secours",
     "ability": "Le druide peut soigner un allié qui n'a plus toutes ses vies, à hauteur de une vie.",
     "color": "#2BC44E",
     "img": "druide.png"

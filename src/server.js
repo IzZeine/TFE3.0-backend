@@ -3,7 +3,7 @@ import { createServer } from "node:http";
 import { Server } from "socket.io";
 import bodyParser from "body-parser";
 import cors from "cors";
-import router from "./routes/router.js";
+import index from "./routes";
 
 export const app = express();
 export const server = createServer(app);
@@ -15,7 +15,7 @@ export const io = new Server(server, {
 app.use(bodyParser.json());
 app.use(express.json());
 app.use(cors());
-app.use(router);
+app.use(index);
 
 app.use(function (req, res, next) {
   req.io = io;

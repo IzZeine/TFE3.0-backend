@@ -17,8 +17,8 @@ export const updateRooms = async (playerRoom) => {
   if (inventory) inventory = inventory + "/" + item;
   if (!inventory) inventory = item;
   //
-  if (itemJson.type == "def") userDef = userDef + Number(itemJson.bonus);
-  if (itemJson.type == "atk") userAtk = userAtk + Number(itemJson.bonus);
+  if (itemJson.type === "def") userDef = userDef + Number(itemJson.bonus);
+  if (itemJson.type === "atk") userAtk = userAtk + Number(itemJson.bonus);
 
   await db("users").where("id", socket.data.userId).update({
     inventory: inventory,

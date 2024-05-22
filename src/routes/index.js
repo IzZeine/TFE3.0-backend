@@ -11,29 +11,29 @@ import { v4 as uuidv4 } from "uuid";
 import { Router } from "express";
 import { createGame } from "../game.js";
 
-const router = Router();
+const index = Router();
 
-router.get("/", homepageController);
+index.get("/", homepageController);
 
 // Route pour récupérer des données depuis la base de données Games
-router.get("/games", gamesListController);
+index.get("/games", gamesListController);
 
 // Route pour récupérer des données depuis la base de données Users
-router.get("/users", usersListController);
+index.get("/users", usersListController);
 
 // Route pour récupérer des données depuis un Json
-router.get("/heroes", heroesListController);
+index.get("/heroes", heroesListController);
 
 // Route pour récupérer des données depuis un Json
-router.get("/boss", bossListController);
+index.get("/boss", bossListController);
 
 // Route pour récupérer des données depuis un Json
-router.get("/items", itemsListController);
+index.get("/items", itemsListController);
 
 // Route pour récupérer des données depuis un Json
-router.get("/roomsConnections", roomsConnectionsController);
+index.get("/roomsConnections", roomsConnectionsController);
 
-router.post("/creategame", async (req, res) => {
+index.post("/creategame", async (req, res) => {
   const { name } = req.body;
   try {
     // Vérifier si le nom de la partie existe déjà dans la base de données
@@ -53,9 +53,9 @@ router.post("/creategame", async (req, res) => {
 });
 
 // Route pour récupérer les games active
-router.get("/activegames", async (req, res) => {
+index.get("/activegames", async (req, res) => {
   const activeGames = await db("games").where("statut", "waiting");
   res.json(activeGames);
 });
 
-export default router;
+export default index;

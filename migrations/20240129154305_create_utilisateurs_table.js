@@ -14,6 +14,7 @@ const up = function (knex) {
     table.integer("life"); // update quand le joueur perd une vie
     table.integer("atk"); // update quand le joueur à choisi son hero et quand il gagne un item
     table.integer("def"); // update quand le joueur à choisi son hero et quand il gagne un item
+    table.integer("speed"); // update quand le joueur à choisi son hero
     table.string("team"); // choisir quand tout le monde est connecté et que la partie commence
     table.integer("room"); // update à chaque changement de salle
     table.jsonb("inventory").defaultTo("");

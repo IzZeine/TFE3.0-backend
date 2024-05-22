@@ -6,7 +6,6 @@
   "type": "module",
   "scripts": {
     "updateKnex": "rimraf db.sqlite3 && npx knex migrate:latest",
-    "knex": "npx knex migrate:latest",
     "server": "node app.js",
     "start": "npm-run-all knex server",
     "dev": "nodemon app.js",

@@ -190,6 +190,7 @@ io.on("connection", async (socket) => {
           username: name,
           room: "0",
           life: 3,
+          speed: 1,
         });
       });
 
@@ -337,7 +338,7 @@ io.on("connection", async (socket) => {
     socket.emit("youAskedRooms", rooms);
   });
 
-  socket.on("askToChangeRoom", async (targetRoom) => {
+  socket.on("askToChangeRoom", async (targetRoom, callback) => {
     if (!socket.data.userId && !socket.data.gameId) return;
 
     await db("users")
@@ -362,7 +363,9 @@ io.on("connection", async (socket) => {
       return;
     }
 
-    socket.emit("movePlayer", socket.data.userId);
+    callback({
+      user: await db("users").where({ id: socket.data.userId }).first(),
+    });
   });
 
   socket.on("getItemInRoom", async (data) => {

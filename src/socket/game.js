@@ -2,12 +2,14 @@ import db from "../../db.js";
 import { io } from "../server.js";
 
 export const updateGame = async (gameId) => {
-  const game = await db("games").where("gameId", gameId).first();
-  io.to(gameId).emit("updateGame", game);
+  console.log("updateGame", gameId);
+  const game = await db("games").where({ gameId }).first();
+  const users = await db("users").where({ gameId });
+  io.to(gameId).emit("updateGame", { ...game, users });
 };
 
 export const updateUsers = async (gameId) => {
-    const users = await db("users").where("gameId", gameId);
+  const users = await db("users").where({ gameId });
 
-    io.to(gameId).emit("updateUsers", users);
+  io.to(gameId).emit("updateUsers", users);
 };

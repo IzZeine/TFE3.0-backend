@@ -18,3 +18,35 @@ export const createGame = async (name) => {
   console.log("createdGame", game);
   return { ...game, rooms };
 };
+
+export const closeGame = async (gameId) => {
+  console.log("closeGame", gameId);
+  await db("games").where({ gameId }).update({ statut: "closed" });
+  const users = await db("users").where({ gameId });
+  const randomIndex = Math.floor(Math.random() * users.length);
+  await db.transaction(async (trx) => {
+    users.map((user, index) => {
+      if (index === randomIndex) {
+        return trx("users")
+          .where({ id: user.id })
+          .update({ team: "boss", room: 0 });
+      }
+      return trx("users")
+        .where({ id: user.id })
+        .update({ team: "hero", room: 38 });
+    });
+  });
+};
+
+export const openGame = async (gameId) => {
+  console.log("openGame", gameId);
+  await db("games").where({ gameId }).update({ statut: "waiting" });
+  const users = await db("users").where({ gameId });
+  await db.transaction(async (trx) => {
+    users.map((user, index) => {
+      return trx("users")
+        .where({ id: user.id })
+        .update({ team: null, hero: null, atk: null, def: null });
+    });
+  });
+};

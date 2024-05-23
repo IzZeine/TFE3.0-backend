@@ -1,12 +1,10 @@
 import db from "../../db.js";
 import { io } from "../server.js";
 import { createUser } from "../models/user.js";
-import { updateUsers } from "./game.js";
+import { updateGame, updateUsers } from "./game.js";
+import { closeGame, openGame } from "../models/game.js";
 
 //TODO: Remove updateUserCount event client side
-
-const reloadUsers = () => {};
-const updateGame = () => {};
 
 io.on("connection", async (socket) => {
   let endGame = async (winner, gameId) => {
@@ -20,11 +18,11 @@ io.on("connection", async (socket) => {
     io.emit("endGame", teamWinner);
   };
 
-  //reloadUsers();
+  //updateUsers();
 
   socket.on("clearAllDataBase", async () => {
     await resetAllDataBase();
-    await reloadUsers();
+    await updateUsers();
   });
 
   socket.on("playSound", (data) => {
@@ -37,48 +35,34 @@ io.on("connection", async (socket) => {
     callback(myUser);
   });
 
+  socket.on("joinGame", async (gameId) => {
+    socket.join(gameId);
+    console.log('board joined', gameId)
+  });
+
   socket.on("isActiveUsers", async (data) => {
-    await reloadUsers();
+    await updateUsers();
   });
 
   // create a user
   socket.on("createUser", async (data, callback) => {
     const { gameId } = data;
-    const user = createUser(data);
+    const user = await createUser(data);
     socket.data.userId = user.id;
     socket.data.user = user;
     socket.join(gameId);
     console.log("Created user ID", user.id);
-    updateUsers(gameId);
+    updateGame(gameId);
     callback(user);
   });
 
   socket.on("closeGame", async (id) => {
-    await db("games").where({ gameId: id }).update({ statut: "closed" });
-    let activeUsersKeys = Array.from(activeUsers.keys());
-    for (const id of activeUsersKeys) {
-      await db("users").where("id", id).update({ team: "hero", room: 0 });
-    }
-    let indexAleatoire = Math.floor(Math.random() * activeUsersKeys.length);
-    await db("users")
-      .where("id", activeUsersKeys[indexAleatoire])
-      .update({ team: "boss", room: 38 });
-
-    reloadUsers();
+    await closeGame(id);
     updateGame(id);
   });
 
   socket.on("openGame", async (id) => {
-    let activeUsersKeys = Array.from(activeUsers.keys());
-    await db("games").where({ gameId: id }).update({ statut: "waiting" });
-
-    for (const id of activeUsersKeys) {
-      await db("users")
-        .where("id", id)
-        .update({ team: null, hero: null, atk: null, def: null });
-    }
-
-    reloadUsers();
+    await openGame(id);
     updateGame(id);
   });
 
@@ -96,7 +80,6 @@ io.on("connection", async (socket) => {
       await db("users").where("id", id).update({ player: numberOfPlayer });
       num++;
     }
-    reloadUsers();
     updateGame(id);
   });
 
@@ -119,37 +102,8 @@ io.on("connection", async (socket) => {
       .where({ id: socket.data.userId })
       .update({ gameId: null });
     // Met à jour le nombre d'utilisateurs connectés et émet à tous les clients
-    await reloadUsers();
+    await updateUsers();
     io.emit("updateUsersCount", activeUsers.size);
-  });
-
-  socket.on("joinGame", async (id) => {
-    if (!socket.data.userId) return;
-    try {
-      socket.join(id);
-      let game = await db("games").where({ gameId: id }).first();
-      if (game.users > maxUsersOnline) {
-        // socket.emit("deco", socket.data.userId);
-        // socket.disconnect;
-        // console.log("deco");
-      } else {
-        // ajuster le bon nbre de joueurs à la game
-        activeUsers.set(socket.data.userId, true);
-        activeUsers.delete(null);
-        await db("users")
-          .where({ id: socket.data.userId })
-          .update({ gameId: id });
-        await db("games")
-          .where({ gameId: id })
-          .update({ users: activeUsers.size });
-        // Met à jour le nombre d'utilisateurs connectés et émet à tous les clients
-        io.emit("updateUsersCount", activeUsers.size);
-        await reloadUsers();
-      }
-    } catch (error) {
-      console.error("Erreur lors de connaction à la partie :", error);
-      // Gérer l'erreur ici
-    }
   });
 
   // add a hero's type to the db
@@ -171,7 +125,7 @@ io.on("connection", async (socket) => {
       // Gérer l'erreur ici
     }
     socket.emit("registeredHero");
-    await reloadUsers();
+    await updateUsers();
   });
 
   socket.on("getRooms", async (gameId) => {
@@ -187,7 +141,7 @@ io.on("connection", async (socket) => {
       .where({ id: socket.data.userId })
       .update({ room: targetRoom });
 
-    await reloadUsers();
+    await updateUsers();
 
     let boss = await db("users")
       .where("gameId", socket.data.gameId)
@@ -213,7 +167,7 @@ io.on("connection", async (socket) => {
   socket.on("getItemInRoom", async (data) => {
     if (!socket.data.userId && !socket.data.gameId) return;
     updateRooms(data);
-    reloadUsers();
+    updateUsers();
     io.emit("takeItemInRoom", data.name);
   });
 
@@ -227,14 +181,14 @@ io.on("connection", async (socket) => {
 
   socket.on("saveUser", async (user) => {
     await db("users").where({ id: user.id }).update({ life: 3 });
-    reloadUsers();
+    updateUsers();
     io.emit("saveYou", user.id);
   });
 
   socket.on("healUser", async (user) => {
     let targetLife = user.life + 1;
     await db("users").where({ id: user.id }).update({ life: targetLife });
-    reloadUsers();
+    updateUsers();
   });
 
   socket.on("nerfDices", () => {
@@ -270,7 +224,7 @@ io.on("connection", async (socket) => {
 
     io.emit("takeItemInRoom", "room" + boss.room, boss);
 
-    reloadUsers();
+    updateUsers();
   });
 
   socket.on("battleEnded", async (data) => {
@@ -297,7 +251,7 @@ io.on("connection", async (socket) => {
         .update("room", 38);
 
       io.emit("returnAtSpawn", winner);
-      reloadUsers();
+      updateUsers();
       return;
     }
 
@@ -347,6 +301,6 @@ io.on("connection", async (socket) => {
 
     io.emit("returnAtSpawn", winner);
 
-    reloadUsers();
+    updateUsers();
   });
 });

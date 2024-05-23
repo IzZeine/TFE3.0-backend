@@ -8,6 +8,8 @@ export const createUser = async ({ username, gameId }, callback) => {
     life: 3,
     speed: 1,
   });
-  const userID = createdIds.pop();
-  return db("users").where("id", userID).first();
+  const userID = createdIds[0];
+  const user = await db("users").where({ id: userID }).first();
+  console.log("CREATED USER", user.id, "in game", user.gameId);
+  return user;
 };

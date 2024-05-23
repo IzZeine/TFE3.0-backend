@@ -1,5 +1,5 @@
-import db from "../db.js";
-import { io } from "./server.js";
+import db from "../../db.js";
+import { io } from "../server.js";
 import { seedGameRooms } from "./rooms.js";
 import { nanoid } from "nanoid";
 

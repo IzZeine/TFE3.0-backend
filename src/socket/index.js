@@ -1,5 +1,7 @@
 import db from "../../db.js";
 import { io } from "../server.js";
+import { createUser } from "../models/user.js";
+import { updateUsers } from "./game.js";
 
 //TODO: Remove updateUserCount event client side
 
@@ -29,13 +31,10 @@ io.on("connection", async (socket) => {
     io.emit("playThisSound", data);
   });
 
-  socket.on("getMyUser", async (id) => {
+  socket.on("getMyUser", async (id, callback) => {
     if (!id) return;
-    let myUser = await db("users").where("id", id).first();
-    socket.emit("ThisIsYourUser", myUser);
-    if (!myUser) return;
-    if (myUser.gameId) socket.data.gameId = myUser.gameId;
-    if (myUser.id) socket.data.userId = myUser.id;
+    const myUser = await db("users").where("id", id).first();
+    callback(myUser);
   });
 
   socket.on("isActiveUsers", async (data) => {
@@ -43,28 +42,15 @@ io.on("connection", async (socket) => {
   });
 
   // create a user
-  socket.on("createUser", async ({username, gameId}, callback) => {
-    try {
-      // Insérer les données dans la table 'utilisateurs'
-
-      const createdIds = await db("users").insert({
-        username,
-        gameId,
-        room: "0",
-        life: 3,
-        speed: 1,
-      });
-      const userID = createdIds.pop();
-      const user = await db("users").where("id", userID).first();
-
-      socket.data.userId = userID;
-      socket.data.user = user;
-      console.log("Created user ID", userID);
-      callback(user);
-    } catch (error) {
-      console.error("Erreur lors de la création du compte :", error);
-      // Gérer l'erreur ici
-    }
+  socket.on("createUser", async (data, callback) => {
+    const { gameId } = data;
+    const user = createUser(data);
+    socket.data.userId = user.id;
+    socket.data.user = user;
+    socket.join(gameId);
+    console.log("Created user ID", user.id);
+    updateUsers(gameId);
+    callback(user);
   });
 
   socket.on("closeGame", async (id) => {

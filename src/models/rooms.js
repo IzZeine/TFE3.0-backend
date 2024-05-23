@@ -1,8 +1,8 @@
-import db from "../db.js";
-import { generateRandomIndexForKey } from "./helpers.js";
-import items from "../items.json" assert { type: "json" };
+import db from "../../db.js";
+import { generateRandomIndexForKey } from "../helpers.js";
+import items from "../../items.json" assert { type: "json" };
 import sample from "lodash/sample.js";
-import { numberOfSafeRoom } from "./config.js";
+import { numberOfSafeRoom } from "../config.js";
 
 const keyItem = items.find((item) => item.nameId === "key");
 
@@ -28,14 +28,14 @@ export const updateRooms = async (playerRoom) => {
 
   user = await db("users").where("id", socket.data.userId).first();
 
-  reloadUsers();
-  socket.emit("updateUser", user);
+  //reloadUsers();
+  //socket.emit("updateUser", user);
   await db("rooms")
     .where("gameId", playerRoom.gameId)
     .andWhere("name", playerRoom.name)
     .update("item", "");
   const rooms = await db("rooms").where({ gameId: playerRoom.gameId });
-  io.emit("youAskedRooms", rooms);
+  //io.emit("youAskedRooms", rooms);
 };
 
 export const seedGameRooms = async (game) => {

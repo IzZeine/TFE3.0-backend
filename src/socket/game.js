@@ -6,7 +6,7 @@ export const updateGame = async (gameId) => {
   io.to(gameId).emit("updateGame", game);
 };
 
-export const reloadUsers = async (gameId) => {
+export const updateUsers = async (gameId) => {
     const users = await db("users").where("gameId", gameId);
 
     io.to(gameId).emit("updateUsers", users);

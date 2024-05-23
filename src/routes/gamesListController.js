@@ -1,6 +1,6 @@
 import db from "../../db.js";
 import { Router } from "express";
-import { createGame } from "../game.js";
+import { createGame } from "../models/game.js";
 
 const router = Router();
 

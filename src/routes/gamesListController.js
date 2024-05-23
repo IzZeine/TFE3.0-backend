@@ -1,13 +1,13 @@
 import db from "../../db.js";
 import { Router } from "express";
-import {createGame, getAllGames} from "../models/game.js";
-import {updateGames} from "../socket/game.js";
+import { createGame, getAllGames } from "../models/game.js";
+import { updateGames } from "../socket/game.js";
 
 const router = Router();
 
 router.get("/", async (req, res) => {
   try {
-    const games = getAllGames()
+    const games = await getAllGames();
     res.json(games);
   } catch (error) {
     console.error("Erreur lors de la récupération des utilisateurs :", error);

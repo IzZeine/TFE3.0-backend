@@ -1,5 +1,6 @@
 const up = function (knex) {
   return knex.schema.createTable("games", function (table) {
+    table.increments("id").primary();
     // état de la partie :
     // ID -> string uuidv4
     table.string("gameId").primary().unique().notNullable();

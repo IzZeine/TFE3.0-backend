@@ -15,10 +15,6 @@ export const createGame = async (name) => {
   });
   const game = await db("games").where({ gameId }).first();
   const rooms = await seedGameRooms(game);
-  console.log(game);
+  console.log("createdGame", game);
   return { ...game, rooms };
-};
-const updateGame = async (id) => {
-  let game = await db("games").where("gameId", id).first();
-  io.emit("updateGame", game);
 };

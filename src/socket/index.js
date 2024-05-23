@@ -33,6 +33,7 @@ io.on("connection", async (socket) => {
     if (!id) return;
     const myUser = await db("users").where("id", id).first();
     socket.data.userId = myUser.id;
+    socket.data.gameId = myUser.gameId;
     socket.data.user = myUser;
     callback(myUser);
   });
@@ -51,6 +52,7 @@ io.on("connection", async (socket) => {
     const { gameId } = data;
     const user = await createUser(data);
     socket.data.userId = user.id;
+    socket.data.gameId = user.gameId;
     socket.data.user = user;
     socket.join(gameId);
     console.log("Created user ID", user.id);
@@ -78,22 +80,19 @@ io.on("connection", async (socket) => {
     if (!socket.data.userId || !socket.data.gameId) return;
 
     console.log(
-      `L'utilisateur avec l'ID ${socket.data.userId} s'est déconnecté`,
+      `L'utilisateur avec l'ID ${socket.data.userId} s'est déconnecté`
     );
 
-    // Supprime l'ID de socket de la map des utilisateurs connectés
-    activeUsers.delete(socket.data.userId);
-
-    await db("games")
-      .where({ gameId: socket.data.gameId })
-      .update({ users: activeUsers.size });
+    // await db("games")
+    //   .where({ gameId: socket.data.gameId })
+    //   .update({ users: activeUsers.size });
 
     await db("users")
       .where({ id: socket.data.userId })
       .update({ gameId: null });
     // Met à jour le nombre d'utilisateurs connectés et émet à tous les clients
-    await updateUsers();
-    io.emit("updateUsersCount", activeUsers.size);
+    await updateUsers(socket.data.gameId);
+    await updateGame(socket.data.gameId);
   });
 
   // add a hero's type to the db

@@ -70,19 +70,7 @@ io.on("connection", async (socket) => {
 
   socket.on("startGame", async (id) => {
     await db("games").where({ gameId: id }).update({ statut: "started" });
-    let activeUsersKeys = Array.from(activeUsers.keys());
-    let num = 1;
-    for (const [index, id] of activeUsersKeys.entries()) {
-      let player = await db("users").where("id", id).first();
-      if (player.team == "boss") {
-        await db("users").where("id", id).update({ player: "boss" });
-        continue;
-      }
-      let numberOfPlayer = "player" + num;
-      await db("users").where("id", id).update({ player: numberOfPlayer });
-      num++;
-    }
-    updateGame(id);
+    await updateGame(id);
   });
 
   // gestion de deconnection des users

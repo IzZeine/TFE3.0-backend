@@ -42,11 +42,11 @@ export const closeGame = async (gameId) => {
         if (index === randomIndex) {
           return trx("users")
             .where({ id: user.id })
-            .update({ team: "boss", room: 0 });
+            .update({ team: "boss", room: 38 });
         }
         return trx("users")
           .where({ id: user.id })
-          .update({ team: "hero", room: 38 });
+          .update({ team: "hero", room: 0 });
       })
     );
   });

@@ -78,7 +78,7 @@ io.on("connection", async (socket) => {
     if (!socket.data.userId || !socket.data.gameId) return;
 
     console.log(
-      `L'utilisateur avec l'ID ${socket.data.userId} s'est déconnecté`
+      `L'utilisateur avec l'ID ${socket.data.userId} s'est déconnecté`,
     );
 
     // Supprime l'ID de socket de la map des utilisateurs connectés
@@ -132,9 +132,7 @@ io.on("connection", async (socket) => {
     await db("users")
       .where({ id: socket.data.userId })
       .update({ room: targetRoom });
-
-    await updateUsers();
-
+    /*
     let boss = await db("users")
       .where("gameId", socket.data.gameId)
       .andWhere("team", "boss")
@@ -150,9 +148,11 @@ io.on("connection", async (socket) => {
       io.emit("battle", { heroes: heroes, boss: boss, room: targetRoom });
       return;
     }
-
+    */
+    const user = await db("users").where({ id: socket.data.userId }).first();
+    await updateUsers(user.gameId);
     callback({
-      user: await db("users").where({ id: socket.data.userId }).first(),
+      user,
     });
   });
 

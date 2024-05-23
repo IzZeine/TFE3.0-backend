@@ -17,6 +17,7 @@ export const updateGames = async () => {
 };
 
 export const updateUsers = async (gameId) => {
+  console.log("updateUsers", gameId);
   const users = await db("users").where({ gameId });
 
   io.to(gameId).emit("updateUsers", users);

@@ -57,10 +57,12 @@ export const openGame = async (gameId) => {
   await db("games").where({ gameId }).update({ statut: "waiting" });
   const users = await db("users").where({ gameId });
   await db.transaction(async (trx) => {
-    users.map((user, index) => {
-      return trx("users")
-        .where({ id: user.id })
-        .update({ team: null, hero: null, atk: null, def: null });
-    });
+    return Promise.all(
+      users.map((user, index) => {
+        return trx("users")
+          .where({ id: user.id })
+          .update({ team: null, hero: null, atk: null, def: null });
+      })
+    );
   });
 };

@@ -1,5 +1,6 @@
-{
-  "snake": {
+[
+ {
+    "nameId": "snake",
     "name": "Serpent",
     "baseLife": "150",
     "baseAtk": "20",
@@ -8,7 +9,8 @@
     "color": "#216A2F",
     "img": "snake.png"
   },
-  "dragon": {
+ {
+    "nameId": "dragon",
     "name": "Dragon",
     "baseLife": "200",
     "baseAtk": "15",
@@ -17,7 +19,8 @@
     "color": "#350001",
     "img": "dragon.png"
   },
-  "golem": {
+ {
+    "nameId": "golem",
     "name": "Golem",
     "baseLife": "250",
     "baseAtk": "10",
@@ -26,4 +29,4 @@
     "color": "#171417",
     "img": "golem.png"
   }
-}
+]

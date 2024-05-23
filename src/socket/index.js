@@ -32,12 +32,14 @@ io.on("connection", async (socket) => {
   socket.on("getMyUser", async (id, callback) => {
     if (!id) return;
     const myUser = await db("users").where("id", id).first();
+    socket.data.userId = myUser.id;
+    socket.data.user = myUser;
     callback(myUser);
   });
 
   socket.on("joinGame", async (gameId) => {
     socket.join(gameId);
-    console.log('board joined', gameId)
+    console.log("board joined", gameId);
   });
 
   socket.on("isActiveUsers", async (data) => {
@@ -58,12 +60,12 @@ io.on("connection", async (socket) => {
 
   socket.on("closeGame", async (id) => {
     await closeGame(id);
-    updateGame(id);
+    await updateGame(id);
   });
 
   socket.on("openGame", async (id) => {
     await openGame(id);
-    updateGame(id);
+    await updateGame(id);
   });
 
   socket.on("startGame", async (id) => {
@@ -88,7 +90,7 @@ io.on("connection", async (socket) => {
     if (!socket.data.userId || !socket.data.gameId) return;
 
     console.log(
-      `L'utilisateur avec l'ID ${socket.data.userId} s'est déconnecté`,
+      `L'utilisateur avec l'ID ${socket.data.userId} s'est déconnecté`
     );
 
     // Supprime l'ID de socket de la map des utilisateurs connectés
@@ -108,10 +110,11 @@ io.on("connection", async (socket) => {
 
   // add a hero's type to the db
   socket.on("selectedHero", async (selectedhero) => {
-    if (!socket.data.userId && !socket.data.gameId) return;
+    if (!socket.data.user?.gameId) return;
+    let user = socket.data.user;
     try {
       // Mettre à jour le champ 'hero' dans la table 'users'
-      await db("users").where({ id: socket.data.userId }).update({
+      await db("users").where({ id: user.id }).update({
         heroImg: selectedhero.img,
         hero: selectedhero.name,
         atk: selectedhero.baseAtk,
@@ -125,7 +128,8 @@ io.on("connection", async (socket) => {
       // Gérer l'erreur ici
     }
     socket.emit("registeredHero");
-    await updateUsers();
+    await updateUsers(user.gameId);
+    await updateGame(user.gameId);
   });
 
   socket.on("getRooms", async (gameId) => {

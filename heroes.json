@@ -1,5 +1,6 @@
-{
-  "knight": {
+[
+  {
+    "nameId": "knight",
     "name": "Chevalier",
     "baseLife": "50",
     "baseAtk": "10",
@@ -8,7 +9,8 @@
     "color": "#949494",
     "img": "knight.png"
   },
-  "wizard": {
+  {
+    "nameId": "wizard",
     "name": "Magicien",
     "baseLife": "40",
     "baseAtk": "15",
@@ -17,7 +19,8 @@
     "color": "#41708C",
     "img": "wizard.png"
   },
-  "rodeur": {
+  {
+    "nameId": "rodeur",
     "name": "Rodeur",
     "baseLife": "40",
     "baseAtk": "15",
@@ -26,7 +29,8 @@
     "color": "#E35457",
     "img": "rodeur.png"
   },
-  "necromancer": {
+  {
+    "nameId": "necromancer",
     "name": "Necromancien",
     "baseLife": "50",
     "baseAtk": "10",
@@ -35,7 +39,8 @@
     "color": "#B90404",
     "img": "necromancer.png"
   },
-  "druide": {
+  {
+    "nameId": "druide",
     "name": "Druide",
     "baseLife": "50",
     "baseAtk": "10",
@@ -44,4 +49,4 @@
     "color": "#2BC44E",
     "img": "druide.png"
   }
-}
+]

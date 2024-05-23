@@ -11,7 +11,7 @@ export const getAllGames = async (name) => {
     rawGames.map(async (game) => {
       const users = await db("users").where({ gameId: game.gameId });
       return { ...game, users };
-    }),
+    })
   );
 };
 
@@ -37,16 +37,18 @@ export const closeGame = async (gameId) => {
   const users = await db("users").where({ gameId });
   const randomIndex = Math.floor(Math.random() * users.length);
   await db.transaction(async (trx) => {
-    users.map((user, index) => {
-      if (index === randomIndex) {
+    return Promise.all(
+      users.map((user, index) => {
+        if (index === randomIndex) {
+          return trx("users")
+            .where({ id: user.id })
+            .update({ team: "boss", room: 0 });
+        }
         return trx("users")
           .where({ id: user.id })
-          .update({ team: "boss", room: 0 });
-      }
-      return trx("users")
-        .where({ id: user.id })
-        .update({ team: "hero", room: 38 });
-    });
+          .update({ team: "hero", room: 38 });
+      })
+    );
   });
 };
 

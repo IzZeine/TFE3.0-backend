@@ -1,19 +1,13 @@
 import db from "../../db.js";
 import { Router } from "express";
-import { createGame } from "../models/game.js";
+import {createGame, getAllGames} from "../models/game.js";
+import {updateGames} from "../socket/game.js";
 
 const router = Router();
 
 router.get("/", async (req, res) => {
   try {
-    const rawGames = await db.select().from("games");
-    const games = await Promise.all(
-      rawGames.map(async (game) => {
-        const rooms = await db("rooms").where({ gameId: game.gameId });
-        const users = await db("users").where({ gameId: game.gameId });
-        return { ...game, users };
-      }),
-    );
+    const games = getAllGames()
     res.json(games);
   } catch (error) {
     console.error("Erreur lors de la récupération des utilisateurs :", error);
@@ -33,6 +27,7 @@ router.post("/", async (req, res) => {
         .json({ success: false, error: "Game name already exists" });
     }
     const game = await createGame(name);
+    await updateGames();
     return res.json(game);
   } catch (error) {
     console.error("Erreur lors de la création de la partie :", error);

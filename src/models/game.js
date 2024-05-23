@@ -3,6 +3,18 @@ import { io } from "../server.js";
 import { seedGameRooms } from "./rooms.js";
 import { nanoid } from "nanoid";
 
+//Ces fonctions doivent être agnostiques du contexte dans lequel elles sont appelées. Elle ne s'occupent que de faire des modifications sur la DB
+
+export const getAllGames = async (name) => {
+  const rawGames = await db.select().from("games");
+  return Promise.all(
+    rawGames.map(async (game) => {
+      const users = await db("users").where({ gameId: game.gameId });
+      return { ...game, users };
+    }),
+  );
+};
+
 export const createGame = async (name) => {
   const gameId = nanoid(); // définir l'ID unique de la game à max 6 joueurs
   // Insérer les données dans la table 'games'

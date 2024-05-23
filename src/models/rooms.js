@@ -4,6 +4,8 @@ import items from "../../items.json" assert { type: "json" };
 import sample from "lodash/sample.js";
 import { numberOfSafeRoom } from "../config.js";
 
+//Ces fonctions doivent être agnostiques du contexte dans lequel elles sont appelées. Elle ne s'occupent que de faire des modifications sur la DB
+
 const keyItem = items.find((item) => item.nameId === "key");
 
 export const updateRooms = async (playerRoom) => {

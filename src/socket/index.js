@@ -56,7 +56,7 @@ io.on("connection", async (socket) => {
     socket.data.user = user;
     socket.join(gameId);
     console.log("Created user ID", user.id);
-    updateGame(gameId);
+    await updateGame(gameId);
     callback(user);
   });
 
@@ -82,17 +82,6 @@ io.on("connection", async (socket) => {
     console.log(
       `L'utilisateur avec l'ID ${socket.data.userId} s'est déconnecté`
     );
-
-    // await db("games")
-    //   .where({ gameId: socket.data.gameId })
-    //   .update({ users: activeUsers.size });
-
-    await db("users")
-      .where({ id: socket.data.userId })
-      .update({ gameId: null });
-    // Met à jour le nombre d'utilisateurs connectés et émet à tous les clients
-    await updateUsers(socket.data.gameId);
-    await updateGame(socket.data.gameId);
   });
 
   // add a hero's type to the db

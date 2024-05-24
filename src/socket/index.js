@@ -1,7 +1,7 @@
 import db from "../../db.js";
 import { io } from "../server.js";
 import { createUser } from "../models/user.js";
-import { updateGame, updateUsers } from "./game.js";
+import { updateGame, updateGames, updateUsers } from "./game.js";
 import { closeGame, openGame } from "../models/game.js";
 import { updateRooms } from "../models/rooms.js";
 
@@ -140,6 +140,7 @@ io.on("connection", async (socket) => {
     */
     const user = await db("users").where({ id: socket.data.userId }).first();
     await updateUsers(user.gameId);
+    await updateGame(user.gameId);
     callback({
       user,
     });
@@ -149,6 +150,7 @@ io.on("connection", async (socket) => {
     if (!socket.data.userId && !socket.data.gameId) return;
     const rooms = await updateRooms(data, socket);
     await updateUsers(socket.data.gameId);
+    await updateGame(socket.data.gameId);
     io.to(socket.data.gameId).emit("youAskedRooms", rooms);
   });
 
@@ -169,7 +171,7 @@ io.on("connection", async (socket) => {
   socket.on("healUser", async (user) => {
     let targetLife = user.life + 1;
     await db("users").where({ id: user.id }).update({ life: targetLife });
-    updateUsers();
+    await updateUsers();
   });
 
   socket.on("nerfDices", () => {

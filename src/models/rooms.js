@@ -3,24 +3,27 @@ import { generateRandomIndexForKey } from "../helpers.js";
 import items from "../../items.json" assert { type: "json" };
 import sample from "lodash/sample.js";
 import { numberOfSafeRoom } from "../config.js";
+import { updateUsers } from "../socket/game.js";
 
 //Ces fonctions doivent être agnostiques du contexte dans lequel elles sont appelées. Elle ne s'occupent que de faire des modifications sur la DB
 
 const keyItem = items.find((item) => item.nameId === "key");
 
-export const updateRooms = async (playerRoom) => {
-  let item = playerRoom.item;
-  let itemJson = JSON.parse(item);
+export const updateRooms = async (playerRoom, socket) => {
+  let item = items.find((item) => item.nameId === playerRoom.itemId);
   let user = await db("users").where("id", socket.data.userId).first();
-  let userDef = user.def;
-  let userAtk = user.atk;
+  let userDef = Number(user.def);
+  let userAtk = Number(user.atk);
   let inventory = user.inventory;
-  //
-  if (inventory) inventory = inventory + "/" + item;
-  if (!inventory) inventory = item;
-  //
-  if (itemJson.type === "def") userDef = userDef + Number(itemJson.bonus);
-  if (itemJson.type === "atk") userAtk = userAtk + Number(itemJson.bonus);
+
+  if (item.type === "def") userDef = userDef + Number(item.bonus);
+  if (item.type === "atk") userAtk = userAtk + Number(item.bonus);
+
+  if (!inventory) {
+    inventory = playerRoom.itemId;
+  } else {
+    inventory = inventory + "/" + playerRoom.itemId;
+  }
 
   await db("users").where("id", socket.data.userId).update({
     inventory: inventory,
@@ -30,14 +33,15 @@ export const updateRooms = async (playerRoom) => {
 
   user = await db("users").where("id", socket.data.userId).first();
 
-  //reloadUsers();
-  //socket.emit("updateUser", user);
+  await updateUsers(socket.data.gameId);
+
   await db("rooms")
     .where("gameId", playerRoom.gameId)
     .andWhere("name", playerRoom.name)
-    .update("item", "");
+    .update("itemId", "");
+
   const rooms = await db("rooms").where({ gameId: playerRoom.gameId });
-  //io.emit("youAskedRooms", rooms);
+  return rooms;
 };
 
 export const seedGameRooms = async (game) => {

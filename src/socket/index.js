@@ -3,6 +3,7 @@ import { io } from "../server.js";
 import { createUser } from "../models/user.js";
 import { updateGame, updateUsers } from "./game.js";
 import { closeGame, openGame } from "../models/game.js";
+import { updateRooms } from "../models/rooms.js";
 
 //TODO: Remove updateUserCount event client side
 
@@ -146,9 +147,9 @@ io.on("connection", async (socket) => {
 
   socket.on("getItemInRoom", async (data) => {
     if (!socket.data.userId && !socket.data.gameId) return;
-    updateRooms(data);
-    updateUsers();
-    io.emit("takeItemInRoom", data.name);
+    const rooms = await updateRooms(data, socket);
+    await updateUsers(socket.data.gameId);
+    io.to(socket.data.gameId).emit("youAskedRooms", rooms);
   });
 
   socket.on("useAbility", async (data) => {

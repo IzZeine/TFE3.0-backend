@@ -133,6 +133,7 @@ io.on("connection", async (socket) => {
     const rooms = await updateRooms(data, socket);
     await updateUsers(socket.data.gameId);
     await updateGame(socket.data.gameId);
+    io.to(socket.data.gameId).emit("itemWasTaken", data);
     io.to(socket.data.gameId).emit("youAskedRooms", rooms);
   });
 
@@ -193,8 +194,6 @@ io.on("connection", async (socket) => {
   });
 
   socket.on("battle", async (data, callback) => {
-    console.log(data.length);
-
     let winner;
     let room = data[0].room;
     let gameId = data[0].gameId;

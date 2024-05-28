@@ -22,3 +22,18 @@ export const updateUsers = async (gameId) => {
 
   io.to(gameId).emit("updateUsers", users);
 };
+
+export const returnAtSpawn = async (gameId, room) => {
+  console.log("return at spawn");
+  await db("users")
+    .whereNot("team", "boss")
+    .andWhere("gameId", gameId)
+    .andWhere("room", room)
+    .update("room", 0);
+
+  await db("users")
+    .where("team", "boss")
+    .andWhere("gameId", gameId)
+    .andWhere("room", room)
+    .update("room", 38);
+};

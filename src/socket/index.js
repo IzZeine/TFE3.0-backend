@@ -4,6 +4,15 @@ import { createUser } from "../models/user.js";
 import { returnAtSpawn, updateGame, updateGames, updateUsers } from "./game.js";
 import { closeGame, openGame } from "../models/game.js";
 import { updateRooms } from "../models/rooms.js";
+import {
+  powerDruide,
+  powerKnight,
+  powerNecromancer,
+  powerRodeur,
+  powerSnake,
+  powerWizard,
+  usePower,
+} from "./powers.js";
 
 //TODO: Remove updateUserCount event client side
 
@@ -137,31 +146,35 @@ io.on("connection", async (socket) => {
     io.to(socket.data.gameId).emit("youAskedRooms", rooms);
   });
 
-  socket.on("useAbility", async (data) => {
-    let user = await db("users").where({ id: socket.data.userId }).first();
-    let id = user.id;
-    let hero = user.hero;
-    if (data.id) id = data.id;
-    io.emit("usedPower", id, hero);
-  });
-
-  socket.on("saveUser", async (user) => {
-    await db("users").where({ id: user.id }).update({ life: 3 });
-    updateUsers();
-    io.emit("saveYou", user.id);
-  });
-
-  socket.on("healUser", async (user) => {
-    let targetLife = user.life + 1;
-    await db("users").where({ id: user.id }).update({ life: targetLife });
-    await updateUsers();
-  });
-
-  socket.on("nerfDices", () => {
-    io.emit("isNerfingDices");
-  });
-  socket.on("undoNerfDices", () => {
-    io.emit("undoNerfingDices");
+  socket.on("usePower", async (data) => {
+    const { user, target, timestamp } = data;
+    await usePower(user);
+    switch (user.hero) {
+      case "Rodeur":
+        await powerRodeur(user, target);
+        break;
+      case "Chevalier":
+        await powerKnight(user);
+        break;
+      case "Necromancien":
+        await powerNecromancer(target);
+        break;
+      case "Druide":
+        await powerDruide(target);
+        break;
+      case "Magicien":
+        await powerWizard(user);
+        break;
+      case "Serpent":
+        await powerSnake(user);
+        break;
+      case "Golem":
+        break;
+      default:
+        console.log("nobody");
+    }
+    await updateUsers(user.gameId);
+    await updateGame(user.gameId);
   });
 
   socket.on("dropARock", async (rock) => {

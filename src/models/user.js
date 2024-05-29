@@ -9,6 +9,9 @@ export const createUser = async ({ username, gameId }, callback) => {
     room: "0",
     life: 3,
     speed: 1,
+    hasKey: false,
+    canUsePower: true,
+    luckDices: 0,
   });
   const userID = createdIds[0];
   const user = await db("users").where({ id: userID }).first();

@@ -25,11 +25,20 @@ export const updateRooms = async (playerRoom, socket) => {
     inventory = inventory + "/" + playerRoom.itemId;
   }
 
-  await db("users").where("id", socket.data.userId).update({
-    inventory: inventory,
-    def: userDef,
-    atk: userAtk,
-  });
+  if (playerRoom.itemId == "key") {
+    await db("users").where("id", socket.data.userId).update({
+      inventory: inventory,
+      def: userDef,
+      atk: userAtk,
+      hasKey: true,
+    });
+  } else {
+    await db("users").where("id", socket.data.userId).update({
+      inventory: inventory,
+      def: userDef,
+      atk: userAtk,
+    });
+  }
 
   user = await db("users").where("id", socket.data.userId).first();
 

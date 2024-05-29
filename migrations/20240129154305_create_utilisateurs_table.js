@@ -10,6 +10,8 @@ const up = function (knex) {
     table.string("color"); // update quand le joueur à choisi son hero
     table.string("abilityName"); // update quand le joueur à choisi son hero
     table.string("ability"); // update quand le joueur à choisi son hero
+    table.boolean("canUsePower");
+    table.integer("luckDices");
     table.string("player"); // update quand le joueur à choisi son hero
     table.integer("life"); // update quand le joueur perd une vie
     table.integer("atk"); // update quand le joueur à choisi son hero et quand il gagne un item
@@ -18,6 +20,7 @@ const up = function (knex) {
     table.string("team"); // choisir quand tout le monde est connecté et que la partie commence
     table.integer("room"); // update à chaque changement de salle
     table.jsonb("inventory").defaultTo("");
+    table.boolean("hasKey");
     table.timestamps(true, true);
   });
 };

@@ -46,7 +46,6 @@ export const powerNecromancer = async (target, socket) => {
 };
 
 export const powerDruide = async (target, socket) => {
-  console.log(target);
   await db("users")
     .where("id", target.id)
     .update({
@@ -124,7 +123,6 @@ const timer = (clearFunction, interval, cooldownTime, socket) => {
   const sendSocket = (elapsedTime) => {
     const seconds = Math.floor(elapsedTime % 60);
     let sendCd = (cooldownTime - seconds).toString();
-    console.log(sendCd);
     socket.emit("cooldownPower", sendCd);
   };
 

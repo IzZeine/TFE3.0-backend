@@ -6,6 +6,7 @@ import { closeGame, openGame } from "../models/game.js";
 import { updateRooms } from "../models/rooms.js";
 import {
   powerDruide,
+  powerGolem,
   powerKnight,
   powerNecromancer,
   powerRodeur,
@@ -148,27 +149,26 @@ io.on("connection", async (socket) => {
 
   socket.on("usePower", async (data) => {
     const { user, target, timestamp } = data;
-    await usePower(user);
+    io.to(user.gameId).emit("usedPower", { user, target });
+    await usePower(user, socket);
     switch (user.hero) {
       case "Rodeur":
-        await powerRodeur(user, target);
+        await powerRodeur(user, target, socket);
         break;
       case "Chevalier":
-        await powerKnight(user);
+        await powerKnight(user, socket);
         break;
       case "Necromancien":
-        await powerNecromancer(target);
+        await powerNecromancer(target, socket);
         break;
       case "Druide":
-        await powerDruide(target);
+        await powerDruide(target, socket);
         break;
       case "Magicien":
-        await powerWizard(user);
+        await powerWizard(user, socket);
         break;
       case "Serpent":
-        await powerSnake(user);
-        break;
-      case "Golem":
+        await powerSnake(user, socket);
         break;
       default:
         console.log("nobody");
@@ -177,39 +177,18 @@ io.on("connection", async (socket) => {
     await updateGame(user.gameId);
   });
 
-  socket.on("dropARock", async (rock) => {
-    if (rock.def == 0) return;
-    if (rock.def == 5) rock.nameId = "rock";
-    if (rock.def == 10) rock.nameId = "rockRare";
-    if (rock.def == 15) rock.nameId = "rockLegendary";
-
-    let rockString = rock;
-    rockString.def = rockString.def.toString();
-    rockString = JSON.stringify(rockString);
-
-    let boss = await db("users")
-      .where("team", "boss")
-      .andWhere("gameId", socket.data.gameId)
-      .first();
-
-    let inventory = boss.inventory;
-    if (inventory) inventory = inventory + "/" + rockString;
-    if (!inventory) inventory = rockString;
-
-    await db("users")
-      .where("team", "boss")
-      .andWhere("gameId", socket.data.gameId)
-      .update({ inventory: inventory, def: boss.def + parseInt(rock.def) });
-
-    io.emit("takeItemInRoom", "room" + boss.room, boss);
-
-    updateUsers();
+  socket.on("dropARock", async () => {
+    if (!socket.data.userId && !socket.data.gameId) return;
+    await powerGolem(socket);
+    await updateUsers(socket.data.gameId);
+    await updateGame(socket.data.gameId);
   });
 
   socket.on("battle", async (data, callback) => {
     let winner;
     let room = data[0].room;
     let gameId = data[0].gameId;
+    io.to(gameId).emit("battle", room);
 
     let boss = data.filter((user) => user.team == "boss");
     let heroes = data.filter((user) => user.team == "hero");

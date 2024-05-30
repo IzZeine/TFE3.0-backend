@@ -66,6 +66,7 @@ export const seedGameRooms = async (game) => {
           gameId: game.gameId,
           name: "room" + i,
           itemId: chosenItem?.nameId,
+          battle: false,
         });
       } catch (error) {
         console.error("Erreur lors de l'insertion des salles :", error);

@@ -14,21 +14,11 @@ import {
   powerWizard,
   usePower,
 } from "./powers.js";
+import { battle, endedBattle, startBattle } from "./battle.js";
 
 //TODO: Remove updateUserCount event client side
 
 io.on("connection", async (socket) => {
-  let endGame = async (winner, gameId) => {
-    await db("games").where({ gameId: gameId }).update({ statut: "ended" });
-
-    let teamWinner = await db("users")
-      .where({ gameId: gameId })
-      .andWhere("team", winner);
-
-    await updateGame(gameId);
-    io.emit("endGame", teamWinner);
-  };
-
   socket.on("clearAllDataBase", async () => {
     await resetAllDataBase();
     await updateUsers();
@@ -159,10 +149,10 @@ io.on("connection", async (socket) => {
         await powerKnight(user, socket);
         break;
       case "Necromancien":
-        await powerNecromancer(target, socket);
+        await powerNecromancer(user, target, socket);
         break;
       case "Druide":
-        await powerDruide(target, socket);
+        await powerDruide(user, target, socket);
         break;
       case "Magicien":
         await powerWizard(user, socket);
@@ -188,120 +178,19 @@ io.on("connection", async (socket) => {
     let winner;
     let room = data[0].room;
     let gameId = data[0].gameId;
+
+    await startBattle(room, gameId);
     io.to(gameId).emit("battle", room);
 
-    let boss = data.filter((user) => user.team == "boss");
-    let heroes = data.filter((user) => user.team == "hero");
-
-    let bossLife = boss[0].def;
-    let totalHeroesAtk = heroes.reduce((total, hero) => total + hero.atk, 0);
-
-    if (bossLife > totalHeroesAtk) {
-      let min = (a, f) => a.reduce((m, x) => (m[f] < x[f] ? m : x));
-      let weakestHero = min(heroes, "def");
-
-      await db("users")
-        .where("id", weakestHero.id)
-        .update("life", weakestHero.life - 1);
-
-      console.log(weakestHero.username);
-      await returnAtSpawn(gameId, room);
-      await updateUsers(gameId);
-      await updateGame(gameId);
-      winner = [...boss];
-    }
-
-    if (bossLife < totalHeroesAtk) {
-      await returnAtSpawn(gameId, room);
-      await updateUsers(gameId);
-      await updateGame(gameId);
-      winner = [...heroes];
-    }
-
-    if (bossLife == totalHeroesAtk) {
-      await returnAtSpawn(gameId, room);
-      await updateUsers(gameId);
-      await updateGame(gameId);
-      winner = null;
-    }
-
-    callback(winner);
-  });
-
-  socket.on("battleEnded", async (data) => {
-    if (!socket.data.userId && !socket.data.gameId) return;
-    let winner = data;
-
-    if (Array.isArray(data)) {
-      winner = "hero";
-      endGame(winner, socket.data.gameId);
-      return;
-    }
-
-    if (typeof data === "number") {
-      await db("users")
-        .whereNot("team", "boss")
-        .andWhere("gameId", socket.data.gameId)
-        .andWhere("room", data)
-        .update("room", 0);
-
-      await db("users")
-        .where("team", "boss")
-        .andWhere("gameId", socket.data.gameId)
-        .andWhere("room", data)
-        .update("room", 38);
-
-      io.emit("returnAtSpawn", winner);
-      updateUsers();
-      return;
-    }
-
-    console.log(data);
-
-    let heroes = await db("users")
-      .whereNot("team", "boss")
-      .andWhere("gameId", socket.data.gameId)
-      .andWhere("room", data.room);
-
-    console.log(heroes);
-
-    if (heroes.length < 1) return;
-
-    let min = (a, f) => a.reduce((m, x) => (m[f] < x[f] ? m : x));
-
-    let weakestHero = min(heroes, "def");
-
-    await db("users")
-      .where("id", weakestHero.id)
-      .update("life", weakestHero.life - 1);
-    if (weakestHero.life <= 0) console.log("t'es mort");
-
-    let allHeroes = await db("users")
-      .whereNot("team", "boss")
-      .andWhere("gameId", socket.data.gameId);
-
-    let heroesDead = allHeroes.every((hero) => hero.life <= 0);
-    console.log(heroesDead);
-
-    if (heroesDead) {
-      await endGame("boss", socket.data.gameId);
-      return;
-    }
-
-    await db("users")
-      .whereNot("team", "boss")
-      .andWhere("gameId", socket.data.gameId)
-      .andWhere("room", data.room)
-      .update("room", 0);
-
-    await db("users")
-      .where("team", "boss")
-      .andWhere("gameId", socket.data.gameId)
-      .andWhere("room", data.room)
-      .update("room", 38);
-
-    io.emit("returnAtSpawn", winner);
-
-    updateUsers();
+    setTimeout(async () => {
+      try {
+        winner = await battle(data);
+        await endedBattle(room, gameId);
+        io.to(gameId).emit("endedBattle", room);
+        callback(winner);
+      } catch (error) {
+        console.error("An error occurred:", error);
+      }
+    }, 10000);
   });
 });

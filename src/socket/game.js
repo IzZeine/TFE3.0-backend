@@ -37,3 +37,11 @@ export const returnAtSpawn = async (gameId, room) => {
     .andWhere("room", room)
     .update("room", 38);
 };
+
+export const endGame = async (gameId, winner) => {
+  await db("games")
+    .where({ gameId })
+    .update({ statut: "ended", winner: winner });
+  await updateGame(gameId);
+  await updateUsers(gameId);
+};

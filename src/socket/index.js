@@ -1,7 +1,13 @@
 import db from "../../db.js";
 import { io } from "../server.js";
 import { createUser } from "../models/user.js";
-import { returnAtSpawn, updateGame, updateGames, updateUsers } from "./game.js";
+import {
+  endGame,
+  returnAtSpawn,
+  updateGame,
+  updateGames,
+  updateUsers,
+} from "./game.js";
 import { closeGame, openGame } from "../models/game.js";
 import { updateRooms } from "../models/rooms.js";
 import {
@@ -15,13 +21,12 @@ import {
   usePower,
 } from "./powers.js";
 import { battle, endedBattle, startBattle } from "./battle.js";
-
-//TODO: Remove updateUserCount event client side
+import { clearGameDataBase } from "../models/clear.js";
 
 io.on("connection", async (socket) => {
-  socket.on("clearAllDataBase", async () => {
-    await resetAllDataBase();
-    await updateUsers();
+  socket.on("clearGameDataBase", async (gameId) => {
+    await clearGameDataBase(gameId);
+    // await updateGame(gameId);
   });
 
   socket.on("playSound", (data) => {
@@ -116,6 +121,11 @@ io.on("connection", async (socket) => {
   socket.on("askToChangeRoom", async (targetRoom, callback) => {
     if (!socket.data.userId && !socket.data.gameId) return;
 
+    if (targetRoom == 19) {
+      await endGame(socket.data.gameId, "hero");
+      return;
+    }
+
     await db("users")
       .where({ id: socket.data.userId })
       .update({ room: targetRoom });
@@ -186,11 +196,12 @@ io.on("connection", async (socket) => {
       try {
         winner = await battle(data);
         await endedBattle(room, gameId);
-        io.to(gameId).emit("endedBattle", room);
+        io.to(gameId).emit("endedBattle", { room, winner });
+        if (winner[0].team == "hero") await endGame(gameId, "hero");
         callback(winner);
       } catch (error) {
         console.error("An error occurred:", error);
       }
-    }, 10000);
+    }, 2000);
   });
 });

@@ -8,6 +8,7 @@ const up = function (knex) {
     table.string("name").notNullable().unique();
     // statut -> waiting / inactive / closed / started / ended / toClear
     table.string("statut").notNullable();
+    table.string("winner");
     // nbre de rooms -> 39 -> integer
     table.integer("rooms").notNullable();
     // nbre de joueurs -> entre 2 et 6 -> integer

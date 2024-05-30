@@ -21,6 +21,7 @@ const up = function (knex) {
     table.integer("room"); // update à chaque changement de salle
     table.jsonb("inventory").defaultTo("");
     table.boolean("hasKey");
+    table.boolean("inBattle");
     table.timestamps(true, true);
   });
 };

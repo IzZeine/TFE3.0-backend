@@ -7,6 +7,11 @@ export const startBattle = async (room, gameId) => {
     .andWhere("gameId", gameId)
     .update({ battle: true });
 
+  await db("users")
+    .where("room", room)
+    .andWhere("gameId", gameId)
+    .update({ inBattle: true });
+
   await updateGame(gameId);
   await updateUsers(gameId);
 };
@@ -47,6 +52,11 @@ export const endedBattle = async (room, gameId) => {
     .where("name", `room${room}`)
     .andWhere("gameId", gameId)
     .update({ battle: false });
+
+  await db("users")
+    .where("room", room)
+    .andWhere("gameId", gameId)
+    .update({ inBattle: false });
 
   await returnAtSpawn(gameId, room);
 

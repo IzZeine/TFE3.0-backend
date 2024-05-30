@@ -10,6 +10,7 @@ export const createUser = async ({ username, gameId }, callback) => {
     life: 3,
     speed: 1,
     hasKey: false,
+    inBattle: false,
     canUsePower: true,
     luckDices: 0,
   });

@@ -26,7 +26,6 @@ import { clearGameDataBase } from "../models/clear.js";
 io.on("connection", async (socket) => {
   socket.on("clearGameDataBase", async (gameId) => {
     await clearGameDataBase(gameId);
-    // await updateGame(gameId);
   });
 
   socket.on("playSound", (data) => {

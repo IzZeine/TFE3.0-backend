@@ -135,6 +135,7 @@ io.on("connection", async (socket) => {
     callback({
       user,
     });
+    io.to(socket.data.gameId).emit("logMove", user);
   });
 
   socket.on("getItemInRoom", async (data) => {
@@ -144,6 +145,8 @@ io.on("connection", async (socket) => {
     await updateGame(socket.data.gameId);
     io.to(socket.data.gameId).emit("itemWasTaken", data);
     io.to(socket.data.gameId).emit("youAskedRooms", rooms);
+    let user = await db("users").where("id", socket.data.userId).first();
+    io.to(socket.data.gameId).emit("logItem", user);
   });
 
   socket.on("usePower", async (data) => {
@@ -174,6 +177,7 @@ io.on("connection", async (socket) => {
     }
     await updateUsers(user.gameId);
     await updateGame(user.gameId);
+    io.to(socket.data.gameId).emit("logPower", user);
   });
 
   socket.on("dropARock", async () => {
@@ -190,6 +194,7 @@ io.on("connection", async (socket) => {
 
     await startBattle(room, gameId);
     io.to(gameId).emit("battle", room);
+    io.to(socket.data.gameId).emit("logBattle", room);
 
     setTimeout(async () => {
       try {

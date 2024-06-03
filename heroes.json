@@ -6,7 +6,7 @@
     "baseAtk": "10",
     "abilityName": "Rescousse",
     "ability": "Le chevalier dépasse ses limites pour se déplacer plus vite et rejoindre ses alliés en danger (ou fuir un boss un peu trop fort pour lui).",
-    "color": "#949494",
+    "color": "#836B01",
     "img": "knight.png"
   },
   {
@@ -16,7 +16,7 @@
     "baseAtk": "15",
     "abilityName": "Chance",
     "ability": "Le magicien essaye d'augmenter ses chances. Il gagne (ou pas) bonus sur le prochain lancé de dés.",
-    "color": "#41708C",
+    "color": "#417493",
     "img": "wizard.png"
   },
   {
@@ -26,7 +26,7 @@
     "baseAtk": "15",
     "abilityName": "Téléportation",
     "ability": "Le rodeur peut se téléporter dans une salle aléatoire parmi 5 choix dans le donjon.",
-    "color": "#E35457",
+    "color": "#924807",
     "img": "rodeur.png"
   },
   {
@@ -36,7 +36,7 @@
     "baseAtk": "10",
     "abilityName": "Réincarnation",
     "ability": "Le nécromancien peut ramener à la vie un de ses alliés décédé.",
-    "color": "#B90404",
+    "color": "#666666",
     "img": "necromancer.png"
   },
   {
@@ -46,7 +46,7 @@
     "baseAtk": "10",
     "abilityName": "Secours",
     "ability": "Le druide peut soigner un allié qui n'a plus toutes ses vies, à hauteur de une vie.",
-    "color": "#2BC44E",
+    "color": "#385294",
     "img": "druide.png"
   }
 ]

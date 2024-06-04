@@ -19,9 +19,11 @@ const up = function (knex) {
     table.integer("speed"); // update quand le joueur à choisi son hero
     table.string("team"); // choisir quand tout le monde est connecté et que la partie commence
     table.integer("room"); // update à chaque changement de salle
+    table.integer("pa"); // update à chaque changement de salle
     table.jsonb("inventory").defaultTo("");
     table.boolean("hasKey");
     table.boolean("inBattle");
+    table.boolean("yourTurn");
     table.timestamps(true, true);
   });
 };

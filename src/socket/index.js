@@ -22,6 +22,7 @@ import {
 } from "./powers.js";
 import { battle, endedBattle, startBattle } from "./battle.js";
 import { clearGameDataBase } from "../models/clear.js";
+import { Turns } from "./turns.js";
 
 io.on("connection", async (socket) => {
   socket.on("clearGameDataBase", async (gameId) => {
@@ -65,17 +66,20 @@ io.on("connection", async (socket) => {
 
   socket.on("closeGame", async (id) => {
     await closeGame(id);
+    await updateGames(); // pourquoi ça plante ?
     await updateGame(id);
   });
 
   socket.on("openGame", async (id) => {
     await openGame(id);
+    await updateGames(); // pourquoi ça plante ?
     await updateGame(id);
   });
 
   socket.on("startGame", async (id) => {
     await db("games").where({ gameId: id }).update({ statut: "started" });
     await updateGame(id);
+    await Turns(id);
   });
 
   // gestion de deconnection des users
@@ -115,6 +119,12 @@ io.on("connection", async (socket) => {
     if (!socket.data.userId && !socket.data.gameId) return;
     let rooms = await db("rooms").where({ gameId: gameId });
     socket.emit("youAskedRooms", rooms);
+  });
+
+  socket.on("usePa", async (user) => {
+    await db("users")
+      .where({ id: user.id })
+      .update({ pa: user.pa - 1 });
   });
 
   socket.on("askToChangeRoom", async (targetRoom, callback) => {

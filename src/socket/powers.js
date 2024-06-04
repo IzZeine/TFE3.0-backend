@@ -1,6 +1,5 @@
 import db from "../../db.js";
 import { updateGame, updateUsers } from "./game.js";
-import { Timer } from "../models/timer.js";
 
 export const usePower = async (user, socket) => {
   await db("users").where("id", user.id).update({
@@ -14,9 +13,6 @@ export const powerRodeur = async (user, target, socket) => {
   });
   await updateUsers(user.gameId);
   await updateGame(user.gameId);
-
-  let cooldownTimeSec = 10;
-  timer(() => resetPower(user), 1000, cooldownTimeSec, socket, user.gameId);
 };
 
 export const powerKnight = async (user, socket) => {
@@ -31,18 +27,12 @@ export const powerKnight = async (user, socket) => {
     await updateUsers(user.gameId);
     await updateGame(user.gameId);
   }, 5000);
-
-  let cooldownTimeSec = 30;
-  timer(() => resetPower(user), 1000, cooldownTimeSec, socket, user.gameId);
 };
 
 export const powerNecromancer = async (user, target, socket) => {
   await db("users").where("id", target.id).update({
     life: 3,
   });
-
-  let cooldownTimeSec = 60;
-  timer(() => resetPower(user), 1000, cooldownTimeSec, socket, user.gameId);
 };
 
 export const powerDruide = async (user, target, socket) => {
@@ -51,9 +41,6 @@ export const powerDruide = async (user, target, socket) => {
     .update({
       life: target.life + 1,
     });
-
-  let cooldownTimeSec = 60;
-  timer(() => resetPower(user), 1000, cooldownTimeSec, socket, user.gameId);
 };
 
 export const powerWizard = async (user, socket) => {
@@ -69,9 +56,6 @@ export const powerWizard = async (user, socket) => {
     await updateUsers(user.gameId);
     await updateGame(user.gameId);
   }, 5000);
-
-  let cooldownTimeSec = 30;
-  timer(() => resetPower(user), 1000, cooldownTimeSec, socket, user.gameId);
 };
 
 export const powerSnake = async (user, socket) => {
@@ -88,9 +72,6 @@ export const powerSnake = async (user, socket) => {
     await updateUsers(user.gameId);
     await updateGame(user.gameId);
   }, 15000);
-
-  let cooldownTimeSec = 120;
-  timer(() => resetPower(user), 1000, cooldownTimeSec, socket, user.gameId);
 };
 
 export const powerGolem = async (socket) => {
@@ -115,32 +96,4 @@ export const powerGolem = async (socket) => {
       inventory: inventory,
       def: user.def + randomInt * 5,
     });
-};
-
-const timer = (clearFunction, interval, cooldownTime, socket, gameId) => {
-  socket.emit("cooldownPower", cooldownTime);
-
-  const sendSocket = (elapsedTime) => {
-    const seconds = Math.floor(elapsedTime % 60);
-    let sendCd = (cooldownTime - seconds).toString();
-    socket.emit("cooldownPower", sendCd);
-  };
-
-  const timer = Timer(sendSocket, interval);
-
-  timer.start();
-
-  setTimeout(async function () {
-    timer.stop();
-    clearFunction();
-    socket.emit("cooldownPower", null);
-    await updateUsers(gameId);
-    await updateGame(gameId);
-  }, cooldownTime * 1000);
-};
-
-const resetPower = async (user) => {
-  await db("users").where("id", user.id).update({
-    canUsePower: true,
-  });
 };

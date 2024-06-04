@@ -1,6 +1,7 @@
 import db from "../../db.js";
 import { seedGameRooms } from "./rooms.js";
 import { nanoid } from "nanoid";
+import { updateGames } from "../socket/game.js";
 
 //Ces fonctions doivent être agnostiques du contexte dans lequel elles sont appelées. Elle ne s'occupent que de faire des modifications sur la DB
 
@@ -23,6 +24,8 @@ export const createGame = async (name) => {
     statut: "waiting",
     rooms: 39,
     users: 0,
+    round: 1,
+    turn: "hero",
   });
   const game = await db("games").where({ gameId }).first();
   const rooms = await seedGameRooms(game);
@@ -41,11 +44,11 @@ export const closeGame = async (gameId) => {
         if (index === randomIndex) {
           return trx("users")
             .where({ id: user.id })
-            .update({ team: "boss", room: 38 });
+            .update({ team: "boss", room: 38, pa: 3, yourTurn: false });
         }
         return trx("users")
           .where({ id: user.id })
-          .update({ team: "hero", room: 0 });
+          .update({ team: "hero", room: 0, pa: 3, yourTurn: true });
       })
     );
   });

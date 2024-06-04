@@ -146,7 +146,10 @@ io.on("connection", async (socket) => {
     io.to(socket.data.gameId).emit("itemWasTaken", data);
     io.to(socket.data.gameId).emit("youAskedRooms", rooms);
     let user = await db("users").where("id", socket.data.userId).first();
-    io.to(socket.data.gameId).emit("logItem", user);
+    io.to(socket.data.gameId).emit("logItem", {
+      user: user,
+      item: data.itemId,
+    });
   });
 
   socket.on("usePower", async (data) => {
@@ -194,14 +197,19 @@ io.on("connection", async (socket) => {
 
     await startBattle(room, gameId);
     io.to(gameId).emit("battle", room);
-    io.to(socket.data.gameId).emit("logBattle", room);
+    let boss = data.filter((user) => user.team == "boss");
+    io.to(gameId).emit("logBattle", boss);
 
     setTimeout(async () => {
       try {
         winner = await battle(data);
         await endedBattle(room, gameId);
         io.to(gameId).emit("endedBattle", { room, winner });
-        if (winner[0].team == "hero") await endGame(gameId, "hero");
+        if (winner[0].team == "hero") {
+          await endGame(gameId, "hero");
+          return;
+        }
+        io.to(gameId).emit("logBattleEnded", { room, winner });
         callback(winner);
       } catch (error) {
         console.error("An error occurred:", error);

@@ -66,14 +66,14 @@ io.on("connection", async (socket) => {
 
   socket.on("closeGame", async (id) => {
     await closeGame(id);
-    await updateGames(); // pourquoi ça plante ?
     await updateGame(id);
+    // await updateGames(); // pourquoi ça plante ?
   });
 
   socket.on("openGame", async (id) => {
     await openGame(id);
-    await updateGames(); // pourquoi ça plante ?
     await updateGame(id);
+    // await updateGames(); // pourquoi ça plante ?
   });
 
   socket.on("startGame", async (id) => {

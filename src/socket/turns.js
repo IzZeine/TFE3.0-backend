@@ -48,9 +48,7 @@ export const Turns = async (gameId) => {
 
     if (round > maxRounds || game.statut == "ended") {
       clearInterval(intervalId);
-      let boss = await db("users").where({ gameId }).andWhere({ team: "boss" });
-      boss = [...boss];
-      await endGame(gameId, boss);
+      await endGame(gameId, "boss");
     }
   }
 

@@ -1,7 +1,6 @@
 import db from "../../db.js";
 import { seedGameRooms } from "./rooms.js";
 import { nanoid } from "nanoid";
-import { updateGames } from "../socket/game.js";
 
 //Ces fonctions doivent être agnostiques du contexte dans lequel elles sont appelées. Elle ne s'occupent que de faire des modifications sur la DB
 

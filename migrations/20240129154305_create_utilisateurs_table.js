@@ -11,6 +11,7 @@ const up = function (knex) {
     table.string("abilityName"); // update quand le joueur à choisi son hero
     table.string("ability"); // update quand le joueur à choisi son hero
     table.boolean("canUsePower");
+    table.integer("cdPower");
     table.integer("luckDices");
     table.string("player"); // update quand le joueur à choisi son hero
     table.integer("life"); // update quand le joueur perd une vie

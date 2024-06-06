@@ -3,6 +3,10 @@ import db from "../../db.js";
 //Ces fonctions doivent être agnostiques du contexte dans lequel elles sont appelées. Elle ne s'occupent que de faire des modifications sur la DB
 
 export const createUser = async ({ username, gameId }, callback) => {
+  let targetGame = await db("games").where({ gameId }).first();
+  if (targetGame?.statut == "closed") {
+    return;
+  }
   const createdIds = await db("users").insert({
     username,
     gameId,

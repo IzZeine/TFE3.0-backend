@@ -55,6 +55,10 @@ io.on("connection", async (socket) => {
   socket.on("createUser", async (data, callback) => {
     const { gameId } = data;
     const user = await createUser(data);
+    if (!user) {
+      callback(null);
+      return;
+    }
     socket.data.userId = user.id;
     socket.data.gameId = user.gameId;
     socket.data.user = user;
@@ -67,13 +71,11 @@ io.on("connection", async (socket) => {
   socket.on("closeGame", async (id) => {
     await closeGame(id);
     await updateGame(id);
-    // await updateGames(); // pourquoi ça plante ?
   });
 
   socket.on("openGame", async (id) => {
     await openGame(id);
     await updateGame(id);
-    // await updateGames(); // pourquoi ça plante ?
   });
 
   socket.on("startGame", async (id) => {
@@ -125,6 +127,11 @@ io.on("connection", async (socket) => {
     await db("users")
       .where({ id: user.id })
       .update({ pa: user.pa - 1 });
+  });
+  socket.on("usePa2", async (user) => {
+    await db("users")
+      .where({ id: user.id })
+      .update({ pa: user.pa - 2 });
   });
 
   socket.on("askToChangeRoom", async (targetRoom, callback) => {

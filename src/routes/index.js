@@ -4,10 +4,10 @@ import heroesListController from "./heroesListController.js";
 import itemsListController from "./itemsListController.js";
 import bossListController from "./bossListController.js";
 import roomsConnectionsController from "./roomsConnectionsController.js";
+import roomsListController from "./roomsListController.js";
 import db from "../../db.js";
 
 import { Router } from "express";
-import { createGame } from "../models/game.js";
 
 const router = Router();
 
@@ -25,6 +25,9 @@ router.get("/boss", bossListController);
 
 // Route pour récupérer des données depuis un Json
 router.get("/items", itemsListController);
+
+// Route pour récupérer des données depuis un Json
+router.get("/roomsInfos", roomsListController);
 
 // Route pour récupérer des données depuis un Json
 router.get("/roomsConnections", roomsConnectionsController);

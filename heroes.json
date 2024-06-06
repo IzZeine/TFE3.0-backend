@@ -4,8 +4,8 @@
     "name": "Chevalier",
     "baseLife": "50",
     "baseAtk": "10",
-    "abilityName": "Rescousse",
-    "ability": "Le chevalier dépasse ses limites pour se déplacer plus vite et rejoindre ses alliés en danger (ou fuir un boss un peu trop fort pour lui).",
+    "abilityName": "Blindage",
+    "ability": "Le chevalier dépasse ses limites pour obtenir plus de pa pour aider ses alliés en danger (ou fuir un boss un peu trop fort pour lui).",
     "color": "#836B01",
     "img": "knight.png"
   },

@@ -127,11 +127,15 @@ io.on("connection", async (socket) => {
     await db("users")
       .where({ id: user.id })
       .update({ pa: user.pa - 1 });
+    await updateUsers(user.gameId);
+    await updateGame(user.gameId);
   });
   socket.on("usePa2", async (user) => {
     await db("users")
       .where({ id: user.id })
       .update({ pa: user.pa - 2 });
+    await updateUsers(user.gameId);
+    await updateGame(user.gameId);
   });
 
   socket.on("askToChangeRoom", async (targetRoom, callback) => {
@@ -226,6 +230,15 @@ io.on("connection", async (socket) => {
           await endGame(gameId, "hero");
           return;
         }
+        let users = await db("users")
+          .where({ gameId: winner[0].gameId })
+          .andWhere({ team: "hero" });
+        if (users.every((user) => user.life <= 0)) {
+          console.log("end");
+          await endGame(gameId, "boss");
+          return;
+        }
+
         io.to(gameId).emit("logBattleEnded", { room, winner });
         callback(winner);
       } catch (error) {

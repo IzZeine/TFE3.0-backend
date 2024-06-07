@@ -25,7 +25,7 @@
     "baseLife": "250",
     "baseAtk": "10",
     "abilityName": "Caillou-ophile",
-    "ability": "A chaque visite dans une salle, le golem à une chance de récupérer un couillou et augmenter ses statistiques.",
+    "ability": "A chaque visite dans une salle, le golem à une chance de récupérer un caillou et augmenter ses statistiques.",
     "color": "#171417",
     "img": "golem.png"
   }

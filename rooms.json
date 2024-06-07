@@ -1,5 +1,9 @@
 [
   {
+    "number": "0",
+    "nameDirection": "spawn"
+  },
+  {
     "number": "1",
     "nameDirection": "la salle de la table ronde"
   },

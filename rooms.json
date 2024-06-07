@@ -1,0 +1,154 @@
+[
+  {
+    "number": "1",
+    "nameDirection": "la salle de la table ronde"
+  },
+  {
+    "number": "2",
+    "nameDirection": "la salle des tapisseries"
+  },
+  {
+    "number": "3",
+    "nameDirection": "la salle des manants"
+  },
+  {
+    "number": "4",
+    "nameDirection": "les cuisines"
+  },
+  {
+    "number": "5",
+    "nameDirection": "la salle des gueux"
+  },
+  {
+    "number": "6",
+    "nameDirection": "la salle des jeux"
+  },
+  {
+    "number": "7",
+    "nameDirection": "la salle des enlumineurs "
+  },
+  {
+    "number": "8",
+    "nameDirection": "la salle des tisserands"
+  },
+  {
+    "number": "9",
+    "nameDirection": "la salle des ripailles"
+  },
+  {
+    "number": "10",
+    "nameDirection": "la salle du seigneur"
+  },
+  {
+    "number": "11",
+    "nameDirection": "la salle des étuves"
+  },
+  {
+    "number": "12",
+    "nameDirection": "la salle des armes"
+  },
+  {
+    "number": "13",
+    "nameDirection": "la salles des marchandages"
+  },
+  {
+    "number": "14",
+    "nameDirection": "la salles des cliquailles"
+  },
+  {
+    "number": "15",
+    "nameDirection": "la salle du tavernier"
+  },
+  {
+    "number": "16",
+    "nameDirection": "la salle des couards"
+  },
+  {
+    "number": "17",
+    "nameDirection": "la salle du damelot"
+  },
+  {
+    "number": "18",
+    "nameDirection": "la salle des donzelles"
+  },
+  {
+    "number": "19",
+    "nameDirection": "la salle des coffres"
+  },
+  {
+    "number": "20",
+    "nameDirection": "les bains de jouvence"
+  },
+  {
+    "number": "21",
+    "nameDirection": "la salle des clercs"
+  },
+  {
+    "number": "22",
+    "nameDirection": "la salle du mage"
+  },
+  {
+    "number": "23",
+    "nameDirection": "l'armurerie"
+  },
+  {
+    "number": "24",
+    "nameDirection": "la salle des affûblements"
+  },
+  {
+    "number": "25",
+    "nameDirection": "la salle des meuniers"
+  },
+  {
+    "number": "26",
+    "nameDirection": "la salle du tourmenteur"
+  },
+  {
+    "number": "27",
+    "nameDirection": "la salle des escuyers"
+  },
+  {
+    "number": "28",
+    "nameDirection": "la salle des bourgeois"
+  },
+  {
+    "number": "29",
+    "nameDirection": "la salle salle des pélerins"
+  },
+  {
+    "number": "30",
+    "nameDirection": "la salle du barbier"
+  },
+  {
+    "number": "31",
+    "nameDirection": "la salle des ménestrels"
+  },
+  {
+    "number": "32",
+    "nameDirection": "la salle de la sorceresse"
+  },
+  {
+    "number": "33",
+    "nameDirection": "la salle du mire"
+  },
+  {
+    "number": "34",
+    "nameDirection": "la salle du vitrail"
+  },
+  {
+    "number": "35",
+    "nameDirection": "la salle du tournoi"
+  },
+  {
+    "number": "36",
+    "nameDirection": "la salle des sarrasins"
+  },
+  {
+    "number": "37",
+    "nameDirection": "la salle des allégeances"
+  },
+  {
+    "number": "38",
+    "nameDirection": "la salle du messire"
+  }
+]

@@ -1,5 +1,6 @@
 const up = function (knex) {
   return knex.schema.createTable("games", function (table) {
+    table.increments("id").primary();
     // état de la partie :
     // ID -> string uuidv4
     table.string("gameId").primary().unique().notNullable();
@@ -7,6 +8,9 @@ const up = function (knex) {
     table.string("name").notNullable().unique();
     // statut -> waiting / inactive / closed / started / ended / toClear
     table.string("statut").notNullable();
+    table.integer("round");
+    table.string("turn");
+    table.string("winner");
     // nbre de rooms -> 39 -> integer
     table.integer("rooms").notNullable();
     // nbre de joueurs -> entre 2 et 6 -> integer

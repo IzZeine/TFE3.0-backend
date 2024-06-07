@@ -1,29 +1,32 @@
-{
-  "snake": {
+[
+  {
+    "nameId": "snake",
     "name": "Serpent",
     "baseLife": "150",
     "baseAtk": "20",
-    "abilityName" : "Malchance",
+    "abilityName": "Malchance",
     "ability": "Le serpent diminue les chances de tous les joueurs. Tout le monde prend un malus sur ses dés.",
-    "color": "#216A2F",
+    "color": "#257936",
     "img": "snake.png"
   },
-  "dragon": {
+  {
+    "nameId": "dragon",
     "name": "Dragon",
     "baseLife": "200",
     "baseAtk": "15",
-    "abilityName" : "Pillard",
+    "abilityName": "Pillard",
     "ability": "Le dragon peut, au même rythme que les joueurs, fouiller et récolter dans les salles.",
-    "color": "#350001",
+    "color": "#7A0002",
     "img": "dragon.png"
   },
-  "golem": {
+  {
+    "nameId": "golem",
     "name": "Golem",
     "baseLife": "250",
     "baseAtk": "10",
-    "abilityName" : "Caillou-ophile",
+    "abilityName": "Caillou-ophile",
     "ability": "A chaque visite dans une salle, le golem à une chance de récupérer un couillou et augmenter ses statistiques.",
     "color": "#171417",
     "img": "golem.png"
   }
-}
+]

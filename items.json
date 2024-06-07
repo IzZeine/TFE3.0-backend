@@ -1,5 +1,5 @@
-{
-  "sword": {
+[
+  {
     "nameId": "sword",
     "name": "Epée",
     "rarity": "normal",
@@ -7,7 +7,7 @@
     "bonus": "10",
     "type": "atk"
   },
-  "swordRare": {
+  {
     "nameId": "swordRare",
     "name": "Epée",
     "rarity": "rare",
@@ -15,7 +15,7 @@
     "bonus": "15",
     "type": "atk"
   },
-  "swordLegendary": {
+  {
     "nameId": "swordLegendary",
     "name": "Epée",
     "rarity": "légendaire",
@@ -23,7 +23,7 @@
     "bonus": "20",
     "type": "atk"
   },
-  "stick": {
+  {
     "nameId": "stick",
     "name": "Bâton",
     "rarity": "normal",
@@ -31,7 +31,7 @@
     "bonus": "10",
     "type": "atk"
   },
-  "stickRare": {
+  {
     "nameId": "stickRare",
     "name": "Bâton",
     "rarity": "rare",
@@ -39,7 +39,7 @@
     "bonus": "15",
     "type": "atk"
   },
-  "stickLegendary": {
+  {
     "nameId": "stickLegendary",
     "name": "Bâton",
     "rarity": "légendaire",
@@ -47,7 +47,7 @@
     "bonus": "20",
     "type": "atk"
   },
-  "dagger": {
+  {
     "nameId": "dagger",
     "name": "Dague",
     "rarity": "normal",
@@ -55,7 +55,7 @@
     "bonus": "5",
     "type": "atk"
   },
-  "daggerRare": {
+  {
     "nameId": "daggerRare",
     "name": "Dague",
     "rarity": "rare",
@@ -63,7 +63,7 @@
     "bonus": "10",
     "type": "atk"
   },
-  "daggerLegendary": {
+  {
     "nameId": "daggerLegendary",
     "name": "Dague",
     "rarity": "légendaire",
@@ -71,7 +71,7 @@
     "bonus": "15",
     "type": "atk"
   },
-  "hammer": {
+  {
     "nameId": "hammer",
     "name": "Marteau",
     "rarity": "normal",
@@ -79,7 +79,7 @@
     "bonus": "5",
     "type": "atk"
   },
-  "hammerRare": {
+  {
     "nameId": "hammerRare",
     "name": "Marteau",
     "rarity": "rare",
@@ -87,7 +87,7 @@
     "bonus": "10",
     "type": "atk"
   },
-  "hammerLegendary": {
+  {
     "nameId": "hammerLegendary",
     "name": "Marteau",
     "rarity": "légendaire",
@@ -95,7 +95,7 @@
     "bonus": "15",
     "type": "atk"
   },
-  "ax": {
+  {
     "nameId": "ax",
     "name": "Hache",
     "rarity": "normal",
@@ -103,7 +103,7 @@
     "bonus": "10",
     "type": "atk"
   },
-  "axRare": {
+  {
     "nameId": "axRare",
     "name": "Hache",
     "rarity": "rare",
@@ -111,7 +111,7 @@
     "bonus": "15",
     "type": "atk"
   },
-  "axLegendary": {
+  {
     "nameId": "axLegendary",
     "name": "Hache",
     "rarity": "légendaire",
@@ -119,7 +119,7 @@
     "bonus": "20",
     "type": "atk"
   },
-  "bow": {
+  {
     "nameId": "bow",
     "name": "Arc",
     "rarity": "normal",
@@ -127,7 +127,7 @@
     "bonus": "10",
     "type": "atk"
   },
-  "bowRare": {
+  {
     "nameId": "bowRare",
     "name": "Arc",
     "rarity": "rare",
@@ -135,7 +135,7 @@
     "bonus": "15",
     "type": "atk"
   },
-  "bowLegendary": {
+  {
     "nameId": "bowLegendary",
     "name": "Arc",
     "rarity": "légendaire",
@@ -143,7 +143,7 @@
     "bonus": "20",
     "type": "atk"
   },
-  "potionAtk": {
+  {
     "nameId": "potionAtk",
     "name": "Potion de force",
     "rarity": "normal",
@@ -151,7 +151,7 @@
     "bonus": "15",
     "type": "atk"
   },
-  "potionHeal": {
+  {
     "nameId": "potionHeal",
     "name": "Potion de soin",
     "rarity": "normal",
@@ -159,7 +159,7 @@
     "bonus": "15",
     "type": "def"
   },
-  "shield": {
+  {
     "nameId": "shield",
     "name": "Bouclier",
     "rarity": "normal",
@@ -167,7 +167,7 @@
     "bonus": "10",
     "type": "def"
   },
-  "shieldRare": {
+  {
     "nameId": "shieldRare",
     "name": "Bouclier",
     "rarity": "rare",
@@ -175,7 +175,7 @@
     "bonus": "15",
     "type": "def"
   },
-  "shieldLegendary": {
+  {
     "nameId": "shieldLegendary",
     "name": "Bouclier",
     "rarity": "légendaire",
@@ -183,7 +183,7 @@
     "bonus": "20",
     "type": "def"
   },
-  "key": {
+  {
     "nameId": "key",
     "name": "Clef",
     "rarity": "rare",
@@ -191,4 +191,4 @@
     "bonus": "0",
     "type": "bonus"
   }
-}
+]

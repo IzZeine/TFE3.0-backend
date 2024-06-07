@@ -1,4 +1,4 @@
-import heroesJson from "./../heroes.json" assert { type: "json" };
+import heroesJson from "../../heroes.json" assert { type: "json" };
 
 export default async (req, res) => {
   const heroes = await heroesJson;

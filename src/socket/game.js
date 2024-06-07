@@ -1,6 +1,7 @@
 import db from "../../db.js";
 import { io } from "../server.js";
 import { getAllGames } from "../models/game.js";
+import { clearGameDataBase } from "../models/clear.js";
 
 //Mettre ici les appels que tu utilises tout le temps qui ne sont pas en rapport avec le socket.
 export const updateGame = async (gameId) => {
@@ -44,4 +45,8 @@ export const endGame = async (gameId, winner) => {
     .update({ statut: "ended", winner: winner });
   await updateGame(gameId);
   await updateUsers(gameId);
+
+  setTimeout(async () => {
+    await clearGameDataBase(gameId);
+  }, 15000);
 };

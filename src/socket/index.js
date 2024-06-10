@@ -142,7 +142,11 @@ io.on("connection", async (socket) => {
     if (!socket.data.userId && !socket.data.gameId) return;
 
     if (targetRoom == 19) {
-      await endGame(socket.data.gameId, "hero");
+      io.to(gameId).emit("endGameKey", "hero");
+
+      setTimeout(async function () {
+        await endGame(socket.data.gameId, "hero");
+      }, 3000);
       return;
     }
 
@@ -227,7 +231,10 @@ io.on("connection", async (socket) => {
         await endedBattle(room, gameId);
         io.to(gameId).emit("endedBattle", { room, winner });
         if (winner[0].team == "hero") {
-          await endGame(gameId, "hero");
+          io.to(gameId).emit("endGameBattle", "hero");
+          setTimeout(async function () {
+            await endGame(gameId, "hero");
+          }, 3000);
           return;
         }
         let users = await db("users")
@@ -235,7 +242,10 @@ io.on("connection", async (socket) => {
           .andWhere({ team: "hero" });
         if (users.every((user) => user.life <= 0)) {
           console.log("end");
-          await endGame(gameId, "boss");
+          io.to(gameId).emit("endGameBattle", "boss");
+          setTimeout(async function () {
+            await endGame(gameId, "boss");
+          }, 3000);
           return;
         }
 
@@ -244,6 +254,6 @@ io.on("connection", async (socket) => {
       } catch (error) {
         console.error("An error occurred:", error);
       }
-    }, 2000);
+    }, 3000);
   });
 });

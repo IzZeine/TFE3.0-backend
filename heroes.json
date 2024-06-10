@@ -5,7 +5,7 @@
     "baseLife": "50",
     "baseAtk": "10",
     "abilityName": "Blindage",
-    "ability": "Le chevalier dépasse ses limites pour obtenir plus de pa pour aider ses alliés en danger (ou fuir un boss un peu trop fort pour lui).",
+    "ability": "Le chevalier dépasse ses limites pour obtenir plus de PA pour aider ses alliés en danger (ou fuir un boss un peu trop fort pour lui).",
     "color": "#836B01",
     "img": "knight.png"
   },

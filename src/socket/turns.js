@@ -3,7 +3,7 @@ import { io } from "../server.js";
 import { Timer } from "../models/timer.js";
 import { endGame, updateGame, updateUsers } from "./game.js";
 
-const secPerTurn = 10 * 1000;
+const secPerTurn = 15 * 1000;
 const maxRounds = 30;
 
 export const Turns = async (gameId) => {
@@ -21,6 +21,8 @@ export const Turns = async (gameId) => {
       .where({ gameId })
       .whereNot({ team: game.turn })
       .update({ yourTurn: false });
+
+    io.to(game.gameId).emit("changeTurn", game.turn);
 
     if (game.turn == "hero") {
       await db("games").where({ gameId }).update({ turn: "boss" });
@@ -61,11 +63,13 @@ export const Turns = async (gameId) => {
 
     if (round > maxRounds || game.statut == "ended") {
       clearInterval(intervalId);
-      await endGame(gameId, "boss");
+      io.to(gameId).emit("endGameTurn", "boss");
+
+      setTimeout(async function () {
+        await endGame(gameId, "boss");
+      }, 3000);
     }
   }
-
-  await changeRound();
 
   // Démarrez le changement de tour toutes les 30 secondes
   const intervalId = setInterval(changeRound, secPerTurn);

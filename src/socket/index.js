@@ -142,7 +142,7 @@ io.on("connection", async (socket) => {
     if (!socket.data.userId && !socket.data.gameId) return;
 
     if (targetRoom == 19) {
-      io.to(gameId).emit("endGameKey", "hero");
+      io.to(socket.data.gameId).emit("endGameKey", "hero");
 
       setTimeout(async function () {
         await endGame(socket.data.gameId, "hero");

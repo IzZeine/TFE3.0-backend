@@ -36,7 +36,14 @@ export const Turns = async (gameId) => {
 
       round++;
       await db("games").where({ gameId }).update({ round });
-      await db("users").where({ gameId }).update({ pa: 3, luckDices: 0 });
+      await db("users")
+        .where({ gameId })
+        .andWhere({ team: "hero" })
+        .update({ pa: 3, luckDices: 0 });
+      await db("users")
+        .where({ gameId })
+        .andWhere({ team: "boss" })
+        .update({ pa: 5, luckDices: 0 });
     } else {
       const users = await db("users").where({ gameId });
       users.forEach(async (user) => {

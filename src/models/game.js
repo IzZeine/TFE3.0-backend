@@ -47,7 +47,7 @@ export const closeGame = async (gameId) => {
         }
         return trx("users")
           .where({ id: user.id })
-          .update({ team: "hero", room: 0, pa: 3, yourTurn: false });
+          .update({ team: "hero", room: 0, pa: 5, yourTurn: false });
       })
     );
   });

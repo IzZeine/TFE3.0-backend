@@ -2,7 +2,7 @@
   {
     "nameId": "knight",
     "name": "Chevalier",
-    "baseLife": "50",
+    "baseLife": "70",
     "baseAtk": "10",
     "abilityName": "Blindage",
     "ability": "Le chevalier dépasse ses limites pour obtenir plus de PA pour aider ses alliés en danger (ou fuir un boss un peu trop fort pour lui).",
@@ -13,7 +13,7 @@
     "nameId": "wizard",
     "name": "Magicien",
     "baseLife": "40",
-    "baseAtk": "15",
+    "baseAtk": "30",
     "abilityName": "Chance",
     "ability": "Le magicien essaye d'augmenter ses chances. Il gagne (ou pas) bonus sur le prochain lancé de dés.",
     "color": "#417493",
@@ -22,7 +22,7 @@
   {
     "nameId": "rodeur",
     "name": "Rodeur",
-    "baseLife": "40",
+    "baseLife": "35",
     "baseAtk": "15",
     "abilityName": "Téléportation",
     "ability": "Le rodeur peut se téléporter dans une salle aléatoire parmi 5 choix dans le donjon.",
@@ -32,7 +32,7 @@
   {
     "nameId": "necromancer",
     "name": "Necromancien",
-    "baseLife": "50",
+    "baseLife": "30",
     "baseAtk": "10",
     "abilityName": "Réincarnation",
     "ability": "Le nécromancien peut ramener à la vie un de ses alliés décédé.",

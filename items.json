@@ -12,7 +12,7 @@
     "name": "Epée",
     "rarity": "rare",
     "condition": "7",
-    "bonus": "15",
+    "bonus": "25",
     "type": "atk"
   },
   {
@@ -20,7 +20,7 @@
     "name": "Epée",
     "rarity": "légendaire",
     "condition": "10",
-    "bonus": "20",
+    "bonus": "50",
     "type": "atk"
   },
   {
@@ -36,7 +36,7 @@
     "name": "Bâton",
     "rarity": "rare",
     "condition": "7",
-    "bonus": "15",
+    "bonus": "25",
     "type": "atk"
   },
   {
@@ -44,7 +44,7 @@
     "name": "Bâton",
     "rarity": "légendaire",
     "condition": "10",
-    "bonus": "20",
+    "bonus": "50",
     "type": "atk"
   },
   {
@@ -60,7 +60,7 @@
     "name": "Dague",
     "rarity": "rare",
     "condition": "7",
-    "bonus": "10",
+    "bonus": "20",
     "type": "atk"
   },
   {
@@ -68,7 +68,7 @@
     "name": "Dague",
     "rarity": "légendaire",
     "condition": "10",
-    "bonus": "15",
+    "bonus": "35",
     "type": "atk"
   },
   {
@@ -84,7 +84,7 @@
     "name": "Marteau",
     "rarity": "rare",
     "condition": "7",
-    "bonus": "10",
+    "bonus": "20",
     "type": "atk"
   },
   {
@@ -92,7 +92,7 @@
     "name": "Marteau",
     "rarity": "légendaire",
     "condition": "10",
-    "bonus": "15",
+    "bonus": "35",
     "type": "atk"
   },
   {
@@ -108,7 +108,7 @@
     "name": "Hache",
     "rarity": "rare",
     "condition": "7",
-    "bonus": "15",
+    "bonus": "25",
     "type": "atk"
   },
   {
@@ -116,7 +116,7 @@
     "name": "Hache",
     "rarity": "légendaire",
     "condition": "10",
-    "bonus": "20",
+    "bonus": "50",
     "type": "atk"
   },
   {
@@ -132,7 +132,7 @@
     "name": "Arc",
     "rarity": "rare",
     "condition": "7",
-    "bonus": "15",
+    "bonus": "25",
     "type": "atk"
   },
   {
@@ -140,15 +140,15 @@
     "name": "Arc",
     "rarity": "légendaire",
     "condition": "10",
-    "bonus": "20",
+    "bonus": "50",
     "type": "atk"
   },
   {
     "nameId": "potionAtk",
     "name": "Potion de force",
     "rarity": "normal",
-    "condition": "3",
-    "bonus": "15",
+    "condition": "7",
+    "bonus": "25",
     "type": "atk"
   },
   {
@@ -187,7 +187,7 @@
     "nameId": "key",
     "name": "Clef",
     "rarity": "rare",
-    "condition": "6",
+    "condition": "8",
     "bonus": "0",
     "type": "bonus"
   }

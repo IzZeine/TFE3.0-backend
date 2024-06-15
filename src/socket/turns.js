@@ -39,7 +39,7 @@ export const Turns = async (gameId) => {
       await db("users")
         .where({ gameId })
         .andWhere({ team: "hero" })
-        .update({ pa: 3, luckDices: 0 });
+        .update({ pa: 5, luckDices: 0 });
       await db("users")
         .where({ gameId })
         .andWhere({ team: "boss" })

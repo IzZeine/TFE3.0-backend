@@ -24,6 +24,12 @@ export const updateUsers = async (gameId) => {
   io.to(gameId).emit("updateUsers", users);
 };
 
+const getRandomSpawnRoom = (min, max) => {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+};
+
 export const returnAtSpawn = async (gameId, room) => {
   console.log("return at spawn");
   await db("users")
@@ -36,7 +42,7 @@ export const returnAtSpawn = async (gameId, room) => {
     .where("team", "boss")
     .andWhere("gameId", gameId)
     .andWhere("room", room)
-    .update("room", 38);
+    .update("room", getRandomSpawnRoom(1, 38));
 };
 
 export const endGame = async (gameId, winner) => {

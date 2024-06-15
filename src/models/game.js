@@ -43,7 +43,7 @@ export const closeGame = async (gameId) => {
         if (index === randomIndex) {
           return trx("users")
             .where({ id: user.id })
-            .update({ team: "boss", room: 38, pa: 3, yourTurn: false });
+            .update({ team: "boss", room: 38, pa: 5, yourTurn: false });
         }
         return trx("users")
           .where({ id: user.id })

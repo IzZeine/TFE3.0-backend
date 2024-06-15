@@ -55,9 +55,11 @@ export const updateRooms = async (playerRoom, socket) => {
 
 export const seedGameRooms = async (game) => {
   const randomIndexForKey = generateRandomIndexForKey(game.rooms);
+  console.log(randomIndexForKey);
+  let otherItems = items.filter((item) => item != keyItem);
   await db.transaction(async (trx) => {
     for (let i = 0; i < game.rooms; i++) {
-      let chosenItem = sample(items);
+      let chosenItem = sample(otherItems);
       if (i === 0 || i === numberOfSafeRoom) chosenItem = null;
       if (i === randomIndexForKey) chosenItem = keyItem;
       try {
